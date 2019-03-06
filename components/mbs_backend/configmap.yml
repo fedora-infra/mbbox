@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mbs-backend-configmap
+data:
+  start.sh: |-
+    cat /etc/clientcert/tls.crt /etc/clientcert/tls.key >/tmp/clientcert.combined.pem
+    cd /tmp
+    mkdir -p fedmsg.d/
+    ln -s /etc/mbs-backend/mbs-scheduler.py fedmsg.d/mbs-scheduler.py
+    # Start the fedmsg-hub
+    echo "Starting fedmsg-hub"
+    exec /usr/bin/fedmsg-hub-3
+  mbs-scheduler.py: |-
+    config = {
+      "mbsconsumer": True,
+      "mbspoller": True,
+    }

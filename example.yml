@@ -1,0 +1,18 @@
+---
+project_name: mbox
+template_dir: ./components
+state_dir: ./state
+database:
+  built_in: persistent
+storage:
+  mnt_koji_volname: ""
+koji_hub:
+  public_hostname: koji.mbox.test
+builder:
+  built_in: yes
+identity:
+  built_in: yes
+  public_hostname: identity.mbox.test
+  etc_ipsilon_volname: ""
+mbs:
+  public_hostname: mbs.mbox.test

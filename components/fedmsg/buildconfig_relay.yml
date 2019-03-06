@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: fedmsg-relay
+  name: fedmsg-relay
+spec:
+  runPolicy: Serial
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: fedmsg-relay:latest
+  source:
+    secrets:
+    - secret:
+        name: cacert
+      destinationDir: cacert
+    dockerfile: |-
+      FROM centos:7
+      COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
+      RUN update-ca-trust
+      RUN yum install -y epel-release
+      RUN yum install -y fedmsg-relay
+      EXPOSE 3399
+      EXPOSE 9941
+      ENTRYPOINT /usr/bin/fedmsg-relay

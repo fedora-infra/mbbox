@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: client
+  name: client
+spec:
+  runPolicy: Serial
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: client:latest
+  source:
+    secrets:
+    - secret:
+        name: cacert
+      destinationDir: cacert
+    dockerfile: |-
+      FROM centos:7
+      COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
+      RUN update-ca-trust
+      RUN yum install -y epel-release
+      RUN yum install -y koji fedmsg
+      ENV USER=openshift
+      ENTRYPOINT bash /etc/client/start.sh

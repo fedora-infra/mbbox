@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: mbs-frontend
+  labels:
+    app: mbs-frontend
+    service: mbs-frontend
+spec:
+  replicas: {{ replicas }}
+  selector:
+    deploymentconfig: mbs-frontend
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: mbs-frontend
+        deploymentconfig: mbs-frontend
+    spec:
+      containers:
+      - name: mbs-frontend
+        image: mbs-frontend:latest
+        ports:
+        - containerPort: 8443
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/module-build-service
+          readOnly: true
+        - name: frontend-config-volume
+          mountPath: /etc/mbs-frontend
+          readOnly: true
+        - name: fedmsg-volume
+          mountPath: /etc/fedmsg.d
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: service-cert-volume
+          mountPath: /etc/servicecert
+          readOnly: true
+        readinessProbe:
+          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          httpGet:
+            port: 8443
+            scheme: HTTPS
+            path: /module-build-service/1/module-builds/
+        livenessProbe:
+          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          httpGet:
+            port: 8443
+            scheme: HTTPS
+            path: /module-build-service/1/module-builds/
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mbs-configmap
+      - name: frontend-config-volume
+        configMap:
+          name: mbs-frontend-configmap
+      - name: fedmsg-volume
+        configMap:
+          name: fedmsg-configmap
+      - name: cacert-volume
+        secret:
+          secretName: cacert
+      - name: service-cert-volume
+        secret:
+          secretName: cert-mbs-frontend
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - mbs-frontend
+      from:
+        kind: ImageStreamTag
+        name: mbs-frontend:latest
+        namespace: {{ project_name }}
+    type: ImageChange
+  - type: ConfigChange

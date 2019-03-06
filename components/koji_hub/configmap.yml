@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: koji-hub-configmap
+data:
+  start.sh: |-
+    mkdir /httpdir/run
+    ln -s /etc/httpd/modules /httpdir/modules
+    truncate --size=0 /httpdir/accesslog /httpdir/errorlog
+    tail -qf /httpdir/accesslog /httpdir/errorlog &
+    ulimit -c 0
+    mkdir -p /mnt/koji/{packages,repos,work,scratch,repos-dist}
+    exec httpd -f /etc/koji-hub/httpd.conf -DFOREGROUND -DNO_DETACH
+  httpd.conf: |-
+    ServerRoot "/httpdir"
+    PidFile "/httpdir/httpd.pid"
+    LoadModule authn_file_module modules/mod_authn_file.so
+    LoadModule authn_anon_module modules/mod_authn_anon.so
+    LoadModule authz_user_module modules/mod_authz_user.so
+    LoadModule authz_host_module modules/mod_authz_host.so
+    LoadModule include_module modules/mod_include.so
+    LoadModule log_config_module modules/mod_log_config.so
+    LoadModule env_module modules/mod_env.so
+    LoadModule ext_filter_module modules/mod_ext_filter.so
+    LoadModule expires_module modules/mod_expires.so
+    LoadModule headers_module modules/mod_headers.so
+    LoadModule mime_module modules/mod_mime.so
+    LoadModule status_module modules/mod_status.so
+    LoadModule dir_module modules/mod_dir.so
+    LoadModule alias_module modules/mod_alias.so
+    LoadModule rewrite_module modules/mod_rewrite.so
+    LoadModule version_module modules/mod_version.so
+    LoadModule wsgi_module modules/mod_wsgi.so
+    LoadModule authn_core_module modules/mod_authn_core.so
+    LoadModule authz_core_module modules/mod_authz_core.so
+    LoadModule unixd_module modules/mod_unixd.so
+    LoadModule mpm_event_module modules/mod_mpm_event.so
+    LoadModule ssl_module modules/mod_ssl.so
+    StartServers  20
+    ServerLimit   100
+    MaxRequestsPerChild 2000
+    MaxRequestWorkers 100
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog /httpdir/accesslog combined
+    ErrorLog /httpdir/errorlog
+    LogLevel debug
+    TypesConfig /etc/mime.types
+    AddDefaultCharset UTF-8
+    CoreDumpDirectory /tmp
+    Listen 0.0.0.0:8443 https
+    SSLEngine on
+    SSLProtocol TLSv1.2
+
+    WSGIDaemonProcess koji_hub display-name=koji_hub processes=2 threads=2 maximum-requests=1000 home=/httpdir
+    WSGIProcessGroup koji_hub
+    WSGIApplicationGroup %{GLOBAL}
+    WSGISocketPrefix run/wsgi
+    WSGIRestrictStdout Off
+    WSGIRestrictSignal Off
+    WSGIPythonOptimize 1
+
+    Alias /kojihub /usr/share/koji-hub/kojixmlrpc.py
+    <Directory "/usr/share/koji-hub">
+      Options ExecCGI
+      SetHandler wsgi-script
+      Require all granted
+    </Directory>
+
+    Alias /pkgs /mnt/koji
+    <Directory /mnt/koji>
+      Require all granted
+    </Directory>
+
+    RewriteEngine On
+    RewriteRule ^/$ /koji/  [R,L]
+    KeepAlive On
+
+    Alias /koji "/usr/share/koji-web/scripts/wsgi_publisher.py"
+    <Directory "/usr/share/koji-web/scripts">
+      Options ExecCGI
+      SetHandler wsgi-script
+      Require all granted
+    </Directory>
+
+    Alias /koji-static/ "/usr/share/koji-web/static/"
+    <Directory "/usr/share/koji-web/static/">
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    SSLCertificateFile /etc/servicecert/tls.crt
+    SSLCertificateKeyFile /etc/servicecert/tls.key
+    SSLCertificateChainFile /etc/cacert/cert
+    SSLCACertificateFile /etc/cacert/cert
+    <Location /kojihub/ssllogin>
+      SSLVerifyClient require
+      SSLVerifyDepth  10
+      SSLOptions +StdEnvVars
+    </Location>
+  hub.conf: |-
+    [hub]
+    DBName = koji
+    DBUser = mboxdb
+    DBPass = mbox
+    DBHost = postgresql
+    KojiDir = /mnt/koji
+
+    DNUsernameComponent = CN
+    ProxyDNs =
+
+    LoginCreateUser = on
+
+    NotifyOnSuccess = False
+
+    Plugins = fedmsg-koji-plugin runroot_hub
+  kojiweb.conf: |-
+    [web]
+    SiteName = MBOX Koji
+    KojiHubURL = https://localhost:8443/kojihub
+    KojiFilesURL = https://koji-hub:8443/pkgs
+    Secret = MboxKojiWeb
+    LibPath = /usr/share/koji-web/lib
+    LoginDisabled = True
+    KojiHubCA = /etc/cacert/cert
+    InsecureNoSSLVerify = True
+
+    Tasks = runroot

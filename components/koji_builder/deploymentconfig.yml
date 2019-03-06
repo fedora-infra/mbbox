@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: koji-builder
+  labels:
+    app: koji-builder
+    service: koji-builder
+spec:
+  replicas: 1
+  selector:
+    deploymentconfig: koji-builder
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: koji-builder
+        deploymentconfig: koji-builder
+    spec:
+      containers:
+      - name: koji-builder
+        image: koji-builder:latest
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/kojid
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: client-cert-volume
+          mountPath: /etc/clientcert
+          readOnly: true
+        - name: mntkoji
+          mountPath: /mnt/koji
+      volumes:
+      - name: config-volume
+        configMap:
+          name: koji-builder-configmap
+      - name: cacert-volume
+        secret:
+          secretName: cacert
+      - name: client-cert-volume
+        secret:
+          secretName: cert-client-koji-builder-built-in-1
+      - name: mntkoji
+        persistentVolumeClaim:
+          claimName: mntkoji
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - koji-builder
+      from:
+        kind: ImageStreamTag
+        name: koji-builder:latest
+        namespace: {{ project_name }}
+    type: ImageChange
+  - type: ConfigChange

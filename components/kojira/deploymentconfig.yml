@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: kojira
+  labels:
+    app: kojira
+    service: kojira
+spec:
+  replicas: 1
+  selector:
+    deploymentconfig: kojira
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kojira
+        deploymentconfig: kojira
+    spec:
+      containers:
+      - name: kojira
+        image: kojira:latest
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/kojira
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: client-cert-volume
+          mountPath: /etc/clientcert
+          readOnly: true
+        - name: mntkoji
+          mountPath: /mnt/koji
+      volumes:
+      - name: config-volume
+        configMap:
+          name: kojira-configmap
+      - name: cacert-volume
+        secret:
+          secretName: cacert
+      - name: client-cert-volume
+        secret:
+          secretName: cert-client-kojira
+      - name: mntkoji
+        persistentVolumeClaim:
+         claimName: mntkoji
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - kojira
+      from:
+        kind: ImageStreamTag
+        name: kojira:latest
+        namespace: {{ project_name }}
+    type: ImageChange
+  - type: ConfigChange

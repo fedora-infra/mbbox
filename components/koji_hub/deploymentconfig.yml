@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: koji-hub
+  labels:
+    app: koji-hub
+    service: koji-hub
+spec:
+  replicas: {{ replicas }}
+  selector:
+    deploymentconfig: koji-hub
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: koji-hub
+        deploymentconfig: koji-hub
+    spec:
+      containers:
+      - name: koji-hub
+        image: koji-hub:latest
+        ports:
+        - containerPort: 8443
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/koji-hub
+          readOnly: true
+        - name: fedmsg-volume
+          mountPath: /etc/fedmsg.d
+          readOnly: true
+        - name: httpdir-volume
+          mountPath: /httpdir
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: service-cert-volume
+          mountPath: /etc/servicecert
+          readOnly: true
+        - name: mntkoji
+          mountPath: /mnt/koji
+{% if not skipprobes %}
+        readinessProbe:
+          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          httpGet:
+            port: 8443
+            scheme: HTTPS
+            path: /koji/
+        livenessProbe:
+          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          httpGet:
+            port: 8443
+            scheme: HTTPS
+            path: /koji/
+{% endif %}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: koji-hub-configmap
+      - name: fedmsg-volume
+        configMap:
+          name: fedmsg-configmap
+      - name: cacert-volume
+        secret:
+          secretName: cacert
+      - name: service-cert-volume
+        secret:
+          secretName: cert-koji-hub
+      - name: httpdir-volume
+        emptyDir: {}
+      - name: mntkoji
+        persistentVolumeClaim:
+         claimName: mntkoji
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - koji-hub
+      from:
+        kind: ImageStreamTag
+        name: koji-hub:latest
+        namespace: {{ project_name }}
+    type: ImageChange
+  - type: ConfigChange

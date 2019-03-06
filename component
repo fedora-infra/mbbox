@@ -1,0 +1,23 @@
+- Koji-builder
+  - imagefactory
+  - oz
+  - livemediacreate
+  - mock
+- Ipsilon
+  - OpenIDC Extensions
+- MBS
+- ODCS
+
+
+External, configure:
+- Git
+- Lookaside
+
+
+Parameters:
+GIT_BASEURL
+LOOKASIDE_BASEURL
+REALM
+
+Expects:
+PV

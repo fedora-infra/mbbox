@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: mbs-frontend
+  name: mbs-frontend
+spec:
+  runPolicy: Serial
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mbs-frontend:latest
+  source:
+    secrets:
+    - secret:
+        name: cacert
+      destinationDir: cacert
+    dockerfile: |-
+      # Apache on centos7 keeps throwing segfaults...
+      #FROM centos:7
+      FROM fedora:latest
+      COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
+      RUN update-ca-trust
+      RUN yum install -y module-build-service python3-psycopg2 httpd python3-mod_wsgi mod_ssl
+      ENV USER=openshift
+      EXPOSE 8443
+      ENTRYPOINT bash /etc/mbs-frontend/start.sh

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: mbs-backend
+  name: mbs-backend
+spec:
+  runPolicy: Serial
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mbs-backend:latest
+  source:
+    secrets:
+    - secret:
+        name: cacert
+      destinationDir: cacert
+    dockerfile: |-
+      # This must be the same release as the frontends
+      #FROM centos:7
+      FROM fedora:latest
+      COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
+      RUN update-ca-trust
+      RUN yum install -y module-build-service python3-psycopg2 python3-fedmsg
+      ENV USER=openshift
+      ENTRYPOINT bash /etc/mbs-backend/start.sh
