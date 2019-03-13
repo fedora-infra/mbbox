@@ -92,7 +92,8 @@ class KojiHub(BaseComponent):
         res = self.state.database.run_query(
             "koji",
             "insert into users (name, status, usertype) values "
-            "('admin', 0, 0);",
+            "('%s', 0, 0);" % self.state.config.get('koji_hub',
+                                                    'admin_username'),
         )
         if "duplicate key value violates unique constraint" in res.stderr:
             self.logger.debug("Admin user existed")
