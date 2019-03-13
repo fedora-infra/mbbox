@@ -6,10 +6,11 @@ data:
   base.py: |-
     config = dict(
       environment="dev",
+      topic_prefix='org.fedoraproject',
       # Everything is Active in here
       active=True,
 
-      post_init_sleep=0.0,
+      post_init_sleep=1.0,
       zmq_linger=2000,
       high_water_mark=0,
       io_threads=1,
@@ -23,20 +24,37 @@ data:
 
     if "fedmsg-relay" not in hostname:
       print("Using fedmsg-relay for hostname")
-      hostname = "fedmsg-relay"
+      relayhost = "fedmsg-relay"
     else:
       print("This is a fedmsg-relay")
+      relayhost = hostname
 
     config = dict(
       endpoints={
         "relay_outbound": [
-          "tcp://%s:3999" % hostname,
-        ]
+          "tcp://%s:3999" % relayhost,
+        ],
+        "localsystem": [
+          "tcp://%s:3000" % hostname,
+        ],
+        "fedmsg-relay": [
+          "tcp://fedmsg-relay:3000",
+        ],
+        "koji-hub": [
+          "tcp://koji-hub:3000",
+        ],
+        "mbs-backend": [
+          "tcp://mbs-backend:3000",
+        ],
+        "mbs-frontend": [
+          "tcp://mbs-frontend:3000",
+        ],
       },
       relay_inbound=[
-        "tcp://%s:9941" % hostname,
+        "tcp://%s:9941" % relayhost,
       ]
     )
+
   policy.py: |-
     config = dict(
       routing_nitpicky=False,
@@ -44,11 +62,10 @@ data:
       sign_messages=False,
       validate_signatures=False,
     )
+
   logging.py: |-
     import logging
     logging.basicConfig(level=logging.DEBUG)
-    config = {}
-  logging.py.foo: |-
     config = dict(
       logging=dict(
         version=1,

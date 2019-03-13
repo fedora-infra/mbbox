@@ -192,7 +192,7 @@ class State(object):
             capture_output=True,
         ).stdout.strip().split("\n")[-1].strip()
 
-    def oc_exec(self, podname, *command):
+    def oc_exec(self, podname, *command, capture=False):
         if podname.startswith('pod/'):
             podname = podname[len('pod/'):]
         if isinstance(command, tuple):
@@ -208,7 +208,7 @@ class State(object):
         ]
         res = subprocess.run(
             cmd,
-            capture_output=True,
+            capture_output=not capture,
             encoding='utf-8',
             check=False,
         )

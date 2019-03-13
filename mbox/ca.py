@@ -19,10 +19,14 @@ class CertificateAuthority(BaseComponent):
 
     @property
     def is_inited(self):
-        return self.state.oc_object_exists(
+        return self.uses_builtin_ca and self.state.oc_object_exists(
             "secret",
             "cacert",
         )
+
+    @property
+    def uses_builtin_ca(self):
+        return self.state.config.get('ca', 'built_in')
 
     def create_build(self):
         self.logger.debug("Nothing to build for CA")
@@ -33,7 +37,10 @@ class CertificateAuthority(BaseComponent):
 
     @property
     def path(self):
-        return os.path.abspath(os.path.join(self.state.config.state_dir, "ca"))
+        if self.uses_builtin_ca:
+            return os.path.abspath(os.path.join(self.state.config.state_dir, "ca"))
+        else:
+            return os.path.abspath(self.state.config.get('ca', 'directory'))
 
     def _check_seen_name(self, certtype, name):
         if self._seen_names.get(name) not in (None, certtype):
@@ -114,7 +121,8 @@ class CertificateAuthority(BaseComponent):
             raise ValueError("'ca' is not a valid CA service name")
         self._check_seen_name("service", service_name)
         if not self.state.oc_object_exists("secret", "cert-%s" % service_name):
-            self._ensure_service_cert(service_name, *hostnames)
+            if self.uses_builtin_ca:
+                self._ensure_service_cert(service_name, *hostnames)
             self._register_service_cert(service_name)
 
     def _ensure_client_cert(self, client_name):
@@ -157,7 +165,8 @@ class CertificateAuthority(BaseComponent):
         self._check_seen_name("client", client_name)
         if not self.state.oc_object_exists("secret",
                                            "cert-client-%s" % client_name):
-            self._ensure_client_cert(client_name)
+            if self.uses_builtin_ca:
+                self._ensure_client_cert(client_name)
             self._register_client_cert(client_name)
 
     def register_openshift(self):

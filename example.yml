@@ -2,6 +2,9 @@
 project_name: mbox
 template_dir: ./components
 state_dir: ./state
+ca:
+  built_in: yes
+  directory: na
 database:
   built_in: persistent
 storage:
