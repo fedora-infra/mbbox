@@ -52,6 +52,7 @@ data:
     SSLProtocol TLSv1.2
 
     WSGIDaemonProcess koji_hub display-name=koji_hub processes=2 threads=2 maximum-requests=1000 home=/httpdir
+    WSGIPythonPath /usr/share/koji-hub/
     WSGIProcessGroup koji_hub
     WSGIApplicationGroup %{GLOBAL}
     WSGISocketPrefix run/wsgi
