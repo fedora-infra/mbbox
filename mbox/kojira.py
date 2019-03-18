@@ -23,6 +23,7 @@ class Kojira(BaseComponent):
         )
         self.state.apply_object_from_template(
             "kojira/configmap.yml",
+            username=self.state.config.get("kojira", "username"),
         )
         self.state.apply_object_from_template(
             "kojira/deploymentconfig.yml",

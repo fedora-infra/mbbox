@@ -12,6 +12,8 @@ storage:
 koji_hub:
   public_hostname: koji.mbox.test
   admin_username: admin
+kojira:
+  username: kojira
 builder:
   built_in: yes
 identity:

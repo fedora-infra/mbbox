@@ -10,7 +10,7 @@ data:
     [kojira]
     ; Configuration authentication
     serverca = /etc/cacert/cert
-    user=kojira
+    user={{ username }}
     cert=/tmp/clientcert.combined.pem
 
     server=https://koji-hub:8443/kojihub
