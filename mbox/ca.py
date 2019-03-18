@@ -32,7 +32,8 @@ class CertificateAuthority(BaseComponent):
         self.logger.debug("Nothing to build for CA")
 
     def create(self):
-        self.create_ca()
+        if self.uses_builtin_ca:
+            self.create_ca()
         self.register_openshift()
 
     @property
