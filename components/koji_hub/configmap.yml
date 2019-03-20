@@ -118,8 +118,8 @@ data:
   kojiweb.conf: |-
     [web]
     SiteName = MBOX Koji
-    KojiHubURL = https://localhost:8443/kojihub
-    KojiFilesURL = https://koji-hub:8443/pkgs
+    KojiHubURL = https://koji-hub:8443/kojihub
+    KojiFilesURL = https://{{ public_hostname }}/pkgs
     Secret = MboxKojiWeb
     LibPath = /usr/share/koji-web/lib
     LoginDisabled = True
