@@ -1,0 +1,33 @@
+---
+
+- name: Install helpful development packages
+  dnf:
+    name: [
+           git,
+           vim-enhanced,
+           python3-black,
+           tmux,
+           htop
+          ]
+    state: present
+
+- name: Install mbbox system dependencies
+  dnf:
+    name: [
+           origin-clients,
+           docker
+          ]
+    state: present
+
+# Add various helpful configuration files
+- name: Install the message of the day
+  copy: src=motd dest=/etc/motd
+
+- name: Copy bashrc
+  copy: src=.bashrc dest=/home/vagrant/.bashrc
+
+- name: Copy test configuration
+  copy: src=mbbox-dev.yml dest=/home/vagrant/mbbox-dev.yml
+
+- import_tasks: rabbitmq.yml
+- import_tasks: openshift.yml

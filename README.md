@@ -20,13 +20,14 @@ Option | Description
 `state_dir` | The location (relative or absolute) where the mbox state should be stored.
 `ca.built_in` | Whether to use the built-in certificate authority. If disabled, you are expected to create certificates manually. Valid options: `yes`, `no`.
 `ca.directory` | Used with `ca.built_in` set to `no`, to find where the certificates should be searched for.
-`database.built_in` | Which Postgres template to use from Openshift. Valid options: `persistent`, `transient` (warning: `transient` means all database contents will be gone on every pod restart - this is not recommended except for testing)
+`database.built_in` | Which Postgres template to use from Openshift. Valid options: `persistent`, `ephemeral` (warning: `ephemeral` means all database contents will be gone on every pod restart - this is not recommended except for testing)
 `store.mnt_koji_volname` | If specified, `mnt_koji` (persistent storage for koji) will request this volume name. If left blank, Openshift will assign a random valid PersistentVolume.
+`store.persistent_storage` | Whether to use persistent volume for koji. Possible values: `yes`, `no`. Use `no` only for testing or debugging purposes.
 `koji_hub.public_hostname` | The hostname to be used for the Koji hub. Needs to be pointed at the Openshift router nodes.
 `koji_hub.admin_username` | The username used for the Koji admin user.
 `kojira.username` | The username used for Kojira (General maintenance tasks in Koji).
 `builder.built_in` | Whether to deploy a builder into Openshift. Possible values: `yes`, `no`.
-`identity.built_in` | Whether to deploy an OpenID Connect identity provider into the Openshift project. Valud options: `yes`. (Using an external identity provider is an outstanding task, contributions welcome).
+`identity.built_in` | Whether to deploy an OpenID Connect identity provider into the Openshift project. Valid options: `yes`. (Using an external identity provider is an outstanding task, contributions welcome).
 `identity.public_hostname` | The hostname used for the built-in identity provider. Needs to be pointed at the Openshift router nodes.
 `identity.etc_ipsilon_volname` | The Openshift Persistent Volume to use for the identity provider temporary storage. Can be left blank for auto-assigned Persistent Volume.
 `mbs.public_hostname` | The hostname used for the Module Build Service deployment. Needs to be pointed at the Openshift router nodes.
@@ -41,3 +42,10 @@ This should result in a fully set up Koji and MBS setup, with one builder runnin
 ### Connecting
 The Koji instance should be available on the hostname configured as `koji_hub.public_hostname`.
 You can use the client certificate named after `koji_hub.admin_username` to connect with the CLI, or run `./main.py configfile.py koji` and then the rest of the standard koji CLI options, and the koji CLI will be run preconfigured.
+
+### Development environment
+This project uses vagrant as development environment. This will prepare the OpenShift instance with mbox project in it. To setup the development simply run `vagrant up` in root folder.
+
+To recreate the environment run `vagrant destroy && vagrant up`. `vagrant provision` will not work because of the various OpenShift commands ran by the ansible provisioning script.
+
+Follow MOTD for more information.
