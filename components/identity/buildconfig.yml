@@ -20,12 +20,12 @@ spec:
     dockerfile: |-
       # Apache on centos7 keeps throwing segfaults...
       #FROM centos:7
-      FROM fedora:latest
+      FROM fedora:31
       COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
       RUN update-ca-trust
-      RUN yum install -y ipsilon ipsilon-openidc python2-psycopg2
+      RUN dnf install -y ipsilon ipsilon-openidc python2-psycopg2
       # Don't try to fix permissions
       # Should go to upstream
-      RUN printf "def fix_user_dirs(*args, **kwargs):\n    pass\n" >>/usr/lib/python2.7/site-packages/ipsilon/tools/files.py
+      RUN printf "def fix_user_dirs(*args, **kwargs):\n    pass\n" >>/usr/lib/python3.7/site-packages/ipsilon/tools/files.py
       EXPOSE 8443
       ENTRYPOINT bash /etc/ipsilon-cfg/start.sh

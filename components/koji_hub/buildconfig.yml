@@ -20,10 +20,10 @@ spec:
     dockerfile: |-
       # Apache on centos7 keeps throwing segfaults...
       #FROM centos:7
-      FROM fedora:latest
+      FROM fedora:31
       COPY cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
       RUN update-ca-trust
-      RUN yum install --setopt tsflags= -y koji koji-hub koji-web koji-hub-plugins httpd mod_ssl postgresql fedmsg
+      RUN dnf install --setopt tsflags= -y koji koji-hub koji-web koji-hub-plugins httpd mod_ssl postgresql fedmsg python3-mod_wsgi 
       RUN curl https://infrastructure.fedoraproject.org/cgit/ansible.git/plain/roles/koji_hub/templates/fedmsg-koji-plugin.py -o /usr/lib/koji-hub-plugins/fedmsg-koji-plugin.py
       RUN rm -f /etc/kojiweb/web.conf
       RUN ln -s /etc/koji-hub/kojiweb.conf /etc/kojiweb/web.conf

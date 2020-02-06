@@ -69,7 +69,7 @@ data:
     confdir = /etc/ipsilon/ipsilon
 
     [arguments]
-    ignored_database_url = postgresql://{{ databse_username }}:{{ database_password }}@{{ database_hostname }}/{{ database_name }}
+    ignored_database_url = postgresql://{{ database_username }}:{{ database_password }}@{{ database_hostname }}/{{ database_name }}
     admin_user = admin
     gssapi = no
     ipa = no

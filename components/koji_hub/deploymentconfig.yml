@@ -82,8 +82,12 @@ spec:
       - name: httpdir-volume
         emptyDir: {}
       - name: mntkoji
+{% if persistent_storage %}
         persistentVolumeClaim:
          claimName: mntkoji
+{% else %}
+        emptyDir: {}
+{% endif %}
   triggers:
   - imageChangeParams:
       automatic: true
