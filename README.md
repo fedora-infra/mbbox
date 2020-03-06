@@ -44,8 +44,24 @@ The Koji instance should be available on the hostname configured as `koji_hub.pu
 You can use the client certificate named after `koji_hub.admin_username` to connect with the CLI, or run `./main.py configfile.py koji` and then the rest of the standard koji CLI options, and the koji CLI will be run preconfigured.
 
 ### Development environment
-This project uses vagrant as development environment. This will prepare the OpenShift instance with mbox project in it. To setup the development simply run `vagrant up` in root folder.
+This project uses vagrant as development environment. There are two different vagrant boxes right now. One for testing and development of current script with OpenShift 3.11 and second for development of operator in OpenShift 4.x. To use the vagrant you need to have installed [`vagrant`](https://www.vagrantup.com/), [`vagrant_sshfs`](https://github.com/dustymabe/vagrant-sshfs) and [`libvirt`](https://libvirt.org/).
 
-To recreate the environment run `vagrant destroy && vagrant up`. `vagrant provision` will not work because of the various OpenShift commands ran by the ansible provisioning script.
+#### OpenShift 3.11 vagrant box
+This will prepare the OpenShift 3.11 instance with mbox project in it. Box itself is named `mbbox_os311`. To setup the development run `vagrant up mbbox_os311` in root folder.
+
+To recreate the environment run `vagrant destroy mbbox_os311 && vagrant up mbbox_os311`. `vagrant provision` will not work because of the various OpenShift commands ran by the ansible provisioning script.
+
+To enter the running vagrant box use `vagrant ssh mbbox_os311`.
+
+Follow MOTD for more information.
+
+#### Operator SDK vagrant box
+This will prepare vagrant box with Operator SDK and every prerequisite for it. Box itself is named `mbbox_osdk`. To setup the development run `vagrant up mbbox_osdk` in root folder.
+
+To recreate the environment run `vagrant destroy mbbox_osdk && vagrant up mbbox_osdk`. `vagrant provision` will not work in most cases because of the various OpenShift commands ran by the ansible provisioning script.
+
+To enter the running vagrant box use `vagrant ssh mbbox_osdk`.
+
+The box is set to use `docker` with [quay.io](https://quay.io) registry. For this to work properly you need to login to your quay.io account using `docker login quay.io`.
 
 Follow MOTD for more information.

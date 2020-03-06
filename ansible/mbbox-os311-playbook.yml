@@ -5,3 +5,4 @@
   vars:
   roles:
     - mbbox-dev
+    - openshift-311
