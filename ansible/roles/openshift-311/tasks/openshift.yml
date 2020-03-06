@@ -2,7 +2,8 @@
 - name: Install openshift dependencies
   dnf:
     name: [
-           origin-clients
+           origin-clients,
+           docker
           ]
     state: present
 

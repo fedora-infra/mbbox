@@ -1,0 +1,9 @@
+---
+# Add various helpful configuration files
+- name: Install the message of the day
+  copy: src=motd dest=/etc/motd
+
+- name: Copy bashrc
+  copy: src=.bashrc dest=/home/vagrant/.bashrc
+
+- import_tasks: operator-sdk.yml
