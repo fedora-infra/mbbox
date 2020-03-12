@@ -1,0 +1,5 @@
+---
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: Mbox
+  role: /opt/ansible/roles/mbox

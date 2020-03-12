@@ -7,26 +7,39 @@ Here are some tips:
 
 * Dev environment is set for the development of ansible based operator for OpenShift, for more info look at https://docs.openshift.com/container-platform/4.3/operators/operator_sdk/osdk-ansible.html
 
-* To test the operator in kubernetes cluster:
-  # Build the image and upload it to quay
-  # This needs to be done every time you made a change to container
-  $ operator_sdk build quay.io/username/mbbox-operator
-  $ docker push quay.io/username/mbbox-operator
+* To test the operator in the local kubernetes cluster
+# This command runs automated E2E (end to end) tests in the local kubernetes cluster
 
-  # Add the mbbox-operator to kubernetes cluster
-  # This needs to be done only once
-  $ oc create -f deploy/service_account.yaml
-  $ oc create -f deploy/role.yaml
-  $ oc create -f deploy/role_binding.yaml
-  $ oc create -f deploy/operator.yaml
+$ operator-sdk test local
+
+* To deploy and run the mbox operator in the local kubernetes cluster:
+  # Build the image and upload it to quay
+  # This needs to be done every time you made a change to the operator code
+  # You may also need to update the image name in mbox-operator/deploy/operator.yaml
+  $ operator-sdk build quay.io/username/mbbox-operator:tag
+  $ docker push quay.io/username/mbbox-operator:tag
+
+  # Create the mbbox-operator requirements to the local kubernetes cluster
+  # This needs to be done only once unless there was a change in any of those resources
+  $ oc apply -f mbox-operator/deploy/crds/apps.fedoraproject.org_mboxes_crd.yaml
+  $ oc apply -f mbox-operator/deploy/service_account.yaml
+  $ oc apply -f mbox-operator/deploy/role.yaml
+  $ oc apply -f mbox-operator/deploy/role_binding.yaml
+  
+  # Deploy the operator
+  $ oc create -f mbox-operator/deploy/operator.yaml
 
   # Verify the operator is up and running
-  $ oc get deployment
+  # There should be a pod with two containers (ansible and operator)
+  $ oc get deployment -w
+
+  # Create a mbox custom resource
+  $ oc create -f mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbox_cr.yaml
 
 * To debug kubernetes deployment here are a few tips
   * oc get all - help you see what is currently in kubernetes cluster
   * oc describe pod/<name> - will give you some overview
-  * oc logs pod/<name> - will show you logs of the pod
+  * oc logs pod/<name> <container> - will show you logs of the pod
 
 Happy hacking!
 
