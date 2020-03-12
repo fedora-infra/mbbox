@@ -1,17 +1,38 @@
 ---
-- name: Install Operator SDK dependencies
+- name: Install Operator SDK system dependencies
   dnf:
     name: [
             golang,
-            docker,
-            ansible,
-            python3-ansible-runner
+            docker
           ]
     state: present
 
-- name: Install OpenShift python package
+- name: Install Operator SDK python dependencies
   pip:
-    name: openshift
+    name: [
+      'ansible',
+      'flake8',
+      'ansible-lint',
+      'molecule',
+      'molecule[docker]',
+      'docker',
+      'kubernetes',
+      'jmespath',
+      'openshift'
+    ]
+
+- name: Create docker group
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: Ensure user is added to docker group
+  user:
+    name: "{{ dev_username }}"
+    groups: ['docker']
+    append: yes
+  become: yes
 
 - name: Start docker
   systemd:
@@ -67,3 +88,6 @@
     dest: /usr/local/bin/operator-sdk
     mode: '0755'
     remote_src: yes
+
+
+#docker config

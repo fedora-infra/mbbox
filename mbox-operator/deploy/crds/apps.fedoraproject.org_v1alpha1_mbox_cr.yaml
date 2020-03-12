@@ -1,0 +1,7 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: Mbox
+metadata:
+  name: example-mbox
+spec:
+  # Add fields here
+  size: 3
