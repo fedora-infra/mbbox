@@ -5,13 +5,16 @@
   connection: local
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    koji_configmap: koji-hub-configmap
   tasks:
-    - name: Get all pods in {{ namespace }}
-      k8s_info:
-        api_version: v1
-        kind: Pod
-        namespace: '{{ namespace }}'
-      register: pods
-
-    - name: Output pods
-      debug: var=pods
+    - name: Assert Koji-Hub ConfigMap
+      block:
+        - k8s_info:
+            api_version: v1
+            kind: ConfigMap
+            namespace: "{{ namespace }}"
+            name: "{{ koji_configmap }}"
+          register: koji_configmap
+        - assert:
+            that:
+              - koji_configmap.resources|length == 1

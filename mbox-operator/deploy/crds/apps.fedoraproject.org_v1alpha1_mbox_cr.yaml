@@ -3,5 +3,4 @@ kind: Mbox
 metadata:
   name: example-mbox
 spec:
-  # Add fields here
-  size: 3
+  size: 1

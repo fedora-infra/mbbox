@@ -4,7 +4,7 @@ dependency:
 driver:
   name: docker
 lint: |
-  yamllint .
+  yamllint roles/
 platforms:
   - name: kind-test-local
     groups:

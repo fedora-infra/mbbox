@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-certs
+data:
+  ca: |-
+    changeme
+
+  cert: |-
+    changeme
+  key: |-
+    changeme
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: koji-hub-msg
+data:
+  koji.ca: |-
+    changeme
+  koji.crt: |-
+    changeme
+  koji.key: |-
+    changeme
+

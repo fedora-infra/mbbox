@@ -1,0 +1,19 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBKojiHub
+metadata:
+  name: mb-koji-hub
+  labels:
+    app: mb-koji-hub
+spec:
+  replicas: 1
+  persistent: true
+  host: ''
+  configmap: koji-hub
+  cacert_secret: cacert
+  service_cert_secret: service-cert
+  postgres_secret: postgres
+  http_enabled: true
+  https_enabled: true
+  topic_prefix: mbox_dev
+  fedora_messaging_url: amqps://koji:something@rabbitmq
+  messaging_cert_cm: koji-hub-msg

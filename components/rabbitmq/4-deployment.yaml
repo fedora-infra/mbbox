@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 15672
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: mbox
+            - name: RABBITMQ_NODENAME
+              value: rabbitmq
+          envFrom:
+           - secretRef:
+               name: rabbitmq-ssl
+          volumeMounts:
+            - mountPath: /var/lib/rabbitmq
+              name: rabbitmq-data
+            - name: rabbitmq-certs
+              mountPath:  /etc/pki/ca-trust/source/anchors
+              readOnly: true
+      volumes:
+        - name: rabbitmq-data
+          persistentVolumeClaim:
+            claimName: rabbitmq-data
+        - name: rabbitmq-certs
+          configMap:
+            name: rabbitmq-certs

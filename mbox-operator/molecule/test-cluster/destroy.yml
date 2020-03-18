@@ -1,10 +1,11 @@
 ---
-- name: Prepare operator resources
+- name: Destroy operator resources
   hosts: localhost
   connection: local
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
     deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
+    custom_resource: "{{ deploy_dir }}/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml"
   tasks:
     - name: Create temp dir
       file:
@@ -17,6 +18,16 @@
         dest: "{{ tmpdir }}/operator.yaml"
       vars:
         REPLACE_IMAGE: "{{ operator_image }}"
+
+    - name: Destroy koji-hub custom resource
+      k8s:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: MBKojiHub
+        name: mb-koji-hub
+        namespace: "{{ namespace }}"
+        state: absent
+        wait: true
+      ignore_errors: true
 
     - name: Destroy operator deployment
       k8s:

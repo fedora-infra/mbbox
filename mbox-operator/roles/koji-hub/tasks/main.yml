@@ -1,0 +1,135 @@
+---
+- block:
+    - name: Retrieve postgresql secret
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ postgres_secret }}"
+      register: k8s_psql_secrets
+    - fail:
+        msg: "Secret {{ postgres_secret }} not found in namespace {{ meta.namespace }}"
+      when: k8s_psql_secrets.resources|length == 0
+    - set_fact:
+        psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
+
+- block:
+    - name: Check if messaging configmap exists
+      k8s_info:
+        api_version: v1
+        kind: ConfigMap
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_hub_messaging_cert_cm }}"
+      register: k8s_msg_cm
+    - fail:
+        msg: "Configmap {{ koji_hub_messaging_cert_cm }} not found in namespace {{ meta.namespace }}"
+      when: k8s_msg_cm.resources|length == 0
+
+- block:
+    - name: Ensure koji-hub configmap is updated
+      template:
+        src: configmap.yml.j2
+        dest: /tmp/configmap.yml
+      vars:
+        koji_hub_psql_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        koji_hub_psql_db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
+        koji_hub_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
+        koji_hub_psql_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
+        koji_hub_fedora_messaging_url: "{{ fedora_messaging_url }}"
+        koji_hub_topic_prefix: "{{ topic_prefix }}"
+
+    - k8s:
+        state: present
+        src: /tmp/configmap.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+
+    - file:
+        path: /tmp/configmap.yml
+        state: absent
+
+- block:
+    - name: Ensure cacert exists
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ cacert_secret | default(koji_hub_cacert_secret) }}"
+        namespace: "{{ meta.namespace }}"
+      register: k8s_cacert
+
+    - include_tasks: cert.yml
+      vars:
+        cert_name: "{{ cacert_secret | default(koji_hub_cacert_secret) }}"
+        cert_key_name: cert
+        pk_key_name: key
+      when: k8s_cacert.resources|length == 0
+
+- block:
+    - name: Ensure service cert exists
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ service_cert_secret | default(koji_hub_service_cert_secret) }}"
+        namespace: "{{ meta.namespace }}"
+      register: k8s_cacert
+
+    - include_tasks: cert.yml
+      vars:
+        cert_name: "{{ service_cert_secret | default(koji_hub_service_cert_secret) }}"
+        cert_key_name: tls.crt
+        pk_key_name: tls.key
+      when: k8s_cacert.resources|length == 0
+
+- name: PVC creation
+  include_tasks: pvc.yml
+  vars:
+    pvc_name: "{{ item['pvc_name'] }}"
+    pvc_size: "{{ item['pvc_size'] }}"
+    pvc_namespace: "{{ meta.namespace }}"
+  with_items:
+    - {
+      "pvc_name": "{{ koji_hub_httpd_pvc_name }}",
+      "pvc_size": "{{ koji_hub_httpd_pvc_size }}"
+    }
+    - {
+      "pvc_name": "{{ koji_hub_mnt_pvc_name }}",
+      "pvc_size": "{{ koji_hub_mnt_pvc_size }}"
+    }
+
+- block:
+    - name: Apply koji-hub http service and ingress
+      template:
+        src: service.yml.j2
+        dest: /tmp/service.yml
+    - k8s:
+        state: present
+        src: /tmp/service.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+    - template:
+        src: ingress.yml.j2
+        dest: /tmp/ingress.yml
+      vars:
+        koji_hub_ingress_name: koji-hub-http
+        koji_hub_ingress_svc: "{{ koji_hub_svc_name }}"
+        koji_hub_ingress_port: "{{ koji_hub_http_port }}"
+    - k8s:
+        state: present
+        src: /tmp/ingress.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+  when: koji_hub_http_enabled
+
+- block:
+    - name: Apply koji-hub deployment
+      template:
+        src: deployment.yml.j2
+        dest: /tmp/deployment.yml
+    - k8s:
+        state: present
+        src: /tmp/deployment.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+    - file:
+        path: /tmp/deployment.yml
+        state: absent
