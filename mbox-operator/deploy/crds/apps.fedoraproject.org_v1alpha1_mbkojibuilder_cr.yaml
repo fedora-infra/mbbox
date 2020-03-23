@@ -1,0 +1,17 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBKojiBuilder
+metadata:
+  name: mb-koji-builder
+spec:
+  image: quay.io/fedora/koji-builder:latest
+  replicas: 1
+  configmap: koji-builder-configmap
+  cacert_secret: koji-hub-ca-cert
+  client_cert_secret: koji-builder-client-cert
+  koji_hub_user: 'koji-builder.mbox.dev'
+  mnt_pvc_name: koji-builder-mnt-pvc
+  mnt_pvc_size: 10Gi
+  koji_hub_url: 'https://koji-hub:8443'
+  max_jobs: 5
+  vendor: MBox
+

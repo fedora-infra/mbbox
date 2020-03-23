@@ -4,6 +4,7 @@ NS = default
 .PHONY: prepare/crds
 prepare/crds:
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojihubs_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojibuilders_crd.yaml
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mboxes_crd.yaml
 
 .PHONY: prepare/rbac
@@ -18,6 +19,7 @@ prepare: prepare/crds prepare/rbac
 .PHONY: prepare/crs
 prepare/crs:
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
 
 .PHONY: deploy
 deploy: prepare
@@ -26,11 +28,13 @@ deploy: prepare
 .PHONY: delete/crds
 delete/crds:
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_mbkojihubs_crd.yaml || true
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_mbkojibuilders_crd.yaml || true
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_mboxes_crd.yaml || true
 
 .PHONY: delete/crs
 delete/crs:
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
 
 .PHONY: delete/rbac
 delete/rbac:
@@ -46,3 +50,4 @@ delete: delete/crds delete/rbac
 .PHONY: run
 run:
 	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml
+	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml

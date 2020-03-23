@@ -1,10 +1,11 @@
 ---
 
 - name: Build Operator in Kubernetes docker container
-  hosts: k8s
+  hosts: localhost
+  connection: local
   vars:
     image_name: apps.fedoraproject.org/mbox-operator:testing
-    dockerfile_path: /build/build/Dockerfile
+    dockerfile_path: ../../build/Dockerfile
   tasks:
     # using command so we don't need to install any dependencies
     - name: Get existing image hash
@@ -13,7 +14,7 @@
       changed_when: false
 
     - name: Build Operator Image
-      command: docker build -f {{ dockerfile_path }} -t {{ image_name }} /build
+      command: docker build -f {{ dockerfile_path }} -t {{ image_name }} ../..
       register: build_cmd
       changed_when: not prev_hash.stdout or (prev_hash.stdout and prev_hash.stdout not in ''.join(build_cmd.stdout_lines[-2:]))
 
@@ -25,42 +26,17 @@
     deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
     pull_policy: Never
     REPLACE_IMAGE: apps.fedoraproject.org/mbox-operator:testing
-    custom_resource: "{{ lookup('file', '/'.join([deploy_dir, 'crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml'])) | from_yaml }}"
+    custom_resource: "{{ lookup('file', '/'.join([deploy_dir, 'crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml'])) | from_yaml }}"
 
   tasks:
     - block:
-        - name: Delete postgres resources
-          k8s:
-            state: absent
-            namespace: "{{ namespace }}"
-            definition: "{{ lookup('file', deploy_dir + '/../../components/psql/' + item) }}"
-            wait: true
-          with_items:
-            - 0-secret.yaml
-            - 1-pvc.yaml
-            - 2-deployment.yaml
-            - 3-service.yaml
-
-        - name: Delete rabbitmq resources
-          k8s:
-            state: absent
-            namespace: "{{ namespace }}"
-            definition: "{{ lookup('file', deploy_dir + '/../../components/rabbitmq/' + item) }}"
-            wait: true
-          with_items:
-            - 0-secret.yaml
-            - 1-configmap.yaml
-            - 2-pvc.yaml
-            - 3-service.yaml
-            - 4-deployment.yaml
-
         - name: Delete the Operator Deployment
           k8s:
             state: absent
             namespace: '{{ namespace }}'
             definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml.j2'])) }}"
           register: delete_deployment
-          when: hostvars[groups.k8s.0].build_cmd.changed
+          when: build_cmd.changed
 
         - name: Wait 30s for Operator Deployment to terminate
           k8s_info:
@@ -75,29 +51,6 @@
           delay: 3
           retries: 10
           when: delete_deployment.changed
-
-        - name: Create postgres resources
-          k8s:
-            definition: "{{ lookup('file', deploy_dir + '/../../components/psql/' + item) }}"
-            namespace: "{{ namespace }}"
-            wait: true
-          with_items:
-            - 0-secret.yaml
-            - 1-pvc.yaml
-            - 2-deployment.yaml
-            - 3-service.yaml
-
-        - name: Create mq resources
-          k8s:
-            namespace: "{{ namespace }}"
-            definition: "{{ lookup('file', deploy_dir + '/../../components/rabbitmq/' + item) }}"
-            wait: true
-          with_items:
-            - 0-secret.yaml
-            - 1-configmap.yaml
-            - 2-pvc.yaml
-            - 3-service.yaml
-            - 4-deployment.yaml
 
         - name: Create the Operator Deployment
           k8s:
@@ -135,39 +88,56 @@
               resource_name=custom_resource.metadata.name
             )}}'
 
-        - name: debug po
+        - name: debug koji-builder lookup
           ignore_errors: true
           failed_when: false
-          k8s_info:
-            kind: Pod
-            api_version: v1
-            namespace: "{{ namespace }}"
-          register: debug_po
-        - shell: "kubectl logs {{ debug_po.resources[0].metadata.name }} -n {{ namespace }}"
-          register: debug_log
-        - debug: var=debug_log
+          debug:
+            var: deploy
+          vars:
+            deploy: '{{ lookup("k8s",
+              kind="Deployment",
+              api_version="apps/v1",
+              namespace=namespace,
+              label_selector="app=koji-builder"
+            )}}'
 
-        - shell: "kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}'` -n {{ namespace }}"
-          register: something
-        - debug: var=something
-
-        - command: kubectl get events
-          register: log
-        - debug: var=log
-
-        - name: get ansible operator logs
+        - name: get sdk operator logs
           ignore_errors: true
           failed_when: false
-          command: kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}'` -n {{ namespace }}
+          command: kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}'` operator -n {{ namespace }}
           environment:
             KUBECONFIG: '{{ lookup("env", "KUBECONFIG") }}'
           vars:
             definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml.j2'])) | from_yaml }}"
           register: log
-          
+
         - debug: var=log.stdout_lines
 
+        - name: get ansible operator logs
+          ignore_errors: true
+          failed_when: false
+          command: kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}'` ansible -n {{ namespace }}
+          environment:
+            KUBECONFIG: '{{ lookup("env", "KUBECONFIG") }}'
+          vars:
+            definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml.j2'])) | from_yaml }}"
+          register: log
+
+        - debug: var=log.stdout_lines
+
+        - name: get ansible koji-builder logs
+          ignore_errors: true
+          failed_when: false
+          command: kubectl logs `kubectl get pod --selector name=koji-builder -o jsonpath='{.items[0].metadata.name}'` ansible -n {{ namespace }}
+          environment:
+            KUBECONFIG: '{{ lookup("env", "KUBECONFIG") }}'
+          vars:
+            definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml.j2'])) | from_yaml }}"
+          register: log
+
+        - debug: var=log.stdout_lines
+          
         - fail:
             msg: "Failed on action: converge"
 
-- import_playbook: '{{ playbook_dir }}/../default/asserts/koji-hub.yml'
+- import_playbook: '{{ playbook_dir }}/../../default/asserts/koji-builder.yml'

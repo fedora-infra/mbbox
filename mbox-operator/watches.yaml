@@ -8,3 +8,8 @@
   group: apps.fedoraproject.org
   kind: MBKojiHub
   role: /opt/ansible/roles/koji-hub
+
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: MBKojiBuilder
+  role: /opt/ansible/roles/koji-builder

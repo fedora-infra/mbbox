@@ -1,0 +1,40 @@
+---
+- block:
+  - name: Ensure koji-builder configmap is updated
+    template:
+      src: configmap.yml.j2
+      dest: /tmp/configmap.yml
+
+  - k8s:
+      state: present
+      src: /tmp/configmap.yml
+      wait: true
+      namespace: "{{ meta.namespace }}"
+
+  - file:
+      path: /tmp/configmap.yml
+      state: absent
+
+- include_tasks: cert.yml
+
+- block:
+    - name: PVC creation
+      include_tasks: pvc.yml
+      vars:
+        pvc_name: "{{ koji_builder_pvc_name }}"
+        pvc_size: "{{ koji_builder_pvc_size }}"
+        pvc_namespace: "{{ meta.namespace }}"
+
+# - block:
+#     - name: Apply koji-builder deployment
+#       template:
+#         src: deployment.yml.j2
+#         dest: /tmp/deployment.yml
+#     - k8s:
+#         state: present
+#         src: /tmp/deployment.yml
+#         wait: true
+#         namespace: "{{ meta.namespace }}"
+#     - file:
+#         path: /tmp/deployment.yml
+#         state: absent

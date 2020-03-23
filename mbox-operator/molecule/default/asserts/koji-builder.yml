@@ -1,0 +1,63 @@
+---
+
+- name: Verify
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  tasks:
+      - block:
+        - name: 'TEST: kojibuilder.configmap'
+          k8s_info:
+            api_version: v1
+            kind: ConfigMap
+            namespace: "{{ namespace }}"
+            name: koji-builder-configmap 
+          register: koji_configmap
+        - assert:
+            that:
+              - koji_configmap.resources|length == 1
+              - koji_configmap.resources[0].metadata.labels['app'] == 'koji-builder'
+              - "'kojid.conf' in koji_configmap.resources[0].data"
+
+      - block:
+          - name: 'TEST: kojibuilder.secret.client-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: koji-builder-client-cert 
+            register: kojibuilder_client_secrets
+          - assert:
+              that:
+                - kojibuilder_client_secrets.resources|length == 1
+                - kojibuilder_client_secrets.resources[0].metadata.labels['app'] == 'koji-builder'
+                - "'tls.crt' in kojibuilder_client_secrets.resources[0].data"
+                - "'tls.key' in kojibuilder_client_secrets.resources[0].data"
+
+      - block:
+          - name: 'TEST: kojibuilder.pvcs'
+            k8s_info:
+              api_version: v1
+              kind: PersistentVolumeClaim
+              namespace: "{{ namespace }}"
+              name: koji-builder-mnt-pvc
+            register: kojibuilder_pvcs
+          - assert:
+              that:
+                - kojibuilder_pvcs.resources|length == 1
+                - kojibuilder_pvcs.resources[0].metadata.labels['app'] == 'koji-builder'
+                - "'ReadWriteOnce' in kojibuilder_pvcs.resources[0].spec.accessModes"
+                - "kojibuilder_pvcs.resources[0].spec.resources.requests.storage == '10Gi'"
+
+#      - block:
+#        - name: 'TEST: kojibuilder.pod deployment'
+#          k8s_info:
+#            api_version: v1
+#            kind: Pod
+#            namespace: "{{ namespace }}"
+#          register: pods
+#        - assert:
+#            that:
+#              - pods.resources|length == 1
+#              - pods.resources[0].metadata.labels['app'] == 'koji-builder'

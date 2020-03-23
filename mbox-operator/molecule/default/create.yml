@@ -1,1 +1,2 @@
 - import_playbook: '{{ playbook_dir }}/create/koji-hub.yml'
+- import_playbook: '{{ playbook_dir }}/create/koji-builder.yml'

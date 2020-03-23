@@ -1,0 +1,16 @@
+---
+# defaults file for koji-builder
+koji_builder_image: "{{ image|default('quay.io/fedora/koji-builder:latest') }}"
+koji_builder_replicas: "{{ replicas|default(1) }}"
+
+koji_builder_configmap: "{{ configmap|default('koji-builder-configmap') }}"
+koji_builder_cacert_secret: "{{ cacert_secret|default('koji-builder-ca-cert') }}"
+koji_builder_client_cert_secret: "{{ client_cert_secret|default('koji-builder-client-cert') }}"
+koji_builder_hub_user: "{{ koji_hub_user|default('koji-builder.mbox.dev') }}"
+
+koji_builder_pvc_name: "{{ mnt_pvc_name|default('koji-builder-mnt-pvc') }}"
+koji_builder_pvc_size: "{{ mnt_pvc_size|default('10Gi') }}"
+
+koji_builder_koji_hub_url: "{{ koji_hub_url|default('https://koji-hub:8443') }}"
+koji_builder_maxjobs: "{{ max_jobs|default(5) }}"
+koji_builder_vendor: "{{ vendor|default('MBox') }}"
