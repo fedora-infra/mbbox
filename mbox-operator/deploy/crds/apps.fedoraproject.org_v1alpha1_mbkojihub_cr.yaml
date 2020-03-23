@@ -8,7 +8,7 @@ spec:
   image: quay.io/fedora/koji-hub:latest
   replicas: 1
   persistent: true
-  host: 'mbox.dev'
+  host: 'koji-hub'
   configmap: koji-hub
   ca_cert_secret: koji-hub-ca-cert
   service_cert_secret: koji-hub-service-cert

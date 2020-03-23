@@ -92,6 +92,3 @@
     dest: /usr/local/bin/operator-sdk
     mode: '0755'
     remote_src: yes
-
-
-#docker config

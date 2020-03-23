@@ -1,8 +1,1 @@
----
-
-- name: Converge
-  hosts: localhost
-  connection: local
-  tasks:
-    - debug:
-        msg: add tasks here
+- import_playbook: '{{ playbook_dir }}/converge/converge_koji-builder.yml'

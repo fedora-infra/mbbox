@@ -1,20 +1,2 @@
----
-
-- name: Verify
-  hosts: localhost
-  connection: local
-  vars:
-    ansible_python_interpreter: '{{ ansible_playbook_python }}'
-    koji_configmap: koji-hub-configmap
-  tasks:
-    - name: Assert Koji-Hub ConfigMap
-      block:
-        - k8s_info:
-            api_version: v1
-            kind: ConfigMap
-            namespace: "{{ namespace }}"
-            name: "{{ koji_configmap }}"
-          register: koji_configmap
-        - assert:
-            that:
-              - koji_configmap.resources|length == 1
+- import_playbook: '{{ playbook_dir }}/asserts/koji-hub.yml'
+- import_playbook: '{{ playbook_dir }}/asserts/koji-builder.yml'

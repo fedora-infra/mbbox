@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koji-builder
+  labels:
+    app: koji-builder
+spec:
+  replicas: {{ koji_builder_replicas|int }}
+  selector:
+    matchLabels:
+      app: koji-builder
+  template:
+    metadata:
+      labels:
+        app: koji-builder
+    spec:
+      containers:
+      - name: koji-builder
+        image: {{ koji_builder_image }}
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/kojid
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: client-cert-volume
+          mountPath: /etc/clientcert
+          readOnly: true
+        - name: koji-builder-mnt
+          mountPath: /mnt/koji
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "{{ koji_builder_configmap }}"
+      - name: cacert-volume
+        secret:
+          secretName: "{{ koji_builder_cacert_secret }}"
+      - name: client-cert-volume
+        secret:
+          secretName: "{{ koji_builder_client_cert_secret }}"
+      - name: koji-builder-mnt
+        persistentVolumeClaim:
+          claimName: {{ koji_builder_pvc_name }}
