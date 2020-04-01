@@ -6,9 +6,8 @@ driver:
   options:
     managed: true
     ansible_connection_options: {}
-lint:
-  name: yamllint
-  enabled: false
+lint: |
+  yamllint roles/
 platforms:
   - name: test-cluster
     groups:
@@ -19,6 +18,8 @@ provisioner:
     group_vars:
       all:
         namespace: ${TEST_NAMESPACE:-osdk-test}
+        tmpdir: /tmp/mbox
+        operator_image: quay.io/fedora/mbox-operator:latest
   lint:
     name: ansible-lint
     enabled: false
@@ -31,7 +32,8 @@ scenario:
     - destroy
     - dependency
     - syntax
-    - create
+    # add a create playbook to create crs
+    # - create
     - prepare
     - converge
     - side_effect
@@ -39,5 +41,5 @@ scenario:
     - destroy
 verifier:
   name: testinfra
-  lint:
-    name: flake8
+  lint: |
+    flake8

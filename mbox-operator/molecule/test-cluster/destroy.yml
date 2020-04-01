@@ -1,0 +1,75 @@
+---
+- name: Prepare operator resources
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
+  tasks:
+    - name: Create temp dir
+      file:
+        state: directory
+        path: "{{ tmpdir }}"
+
+    - name: Process operator template
+      template:
+        src: '{{ deploy_dir }}/operator.yaml.j2'
+        dest: "{{ tmpdir }}/operator.yaml"
+      vars:
+        REPLACE_IMAGE: "{{ operator_image }}"
+
+    - name: Destroy operator deployment
+      k8s:
+        definition: "{{ lookup('file', tmpdir + '/operator.yaml') }}"
+        namespace: "{{ namespace }}"
+        state: absent
+        wait: true
+
+    - name: Wait until pod is gone
+      k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: "{{ namespace }}"
+        label_selectors:
+          - name=mbox-operator
+      register: _status
+      until: _status.resources|length == 0
+      retries: 60
+      delay: 10
+      ignore_errors: yes
+
+    - name: Destroy Custom Resource Definition
+      k8s:
+        definition: "{{ lookup('file', item) }}"
+        state: absent
+        wait: true
+      with_fileglob:
+        - "{{ deploy_dir }}/crds/apps.fedoraproject.org_*_crd.yaml"
+
+    - name: Destroy RBAC resources
+      k8s:
+        definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
+        namespace: '{{ namespace }}'
+        state: absent
+        wait: true
+      with_items:
+        - role.yaml
+        - role_binding.yaml
+        - service_account.yaml
+
+    - name: Destroy cluster RBAC resources
+      k8s:
+        definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
+        state: absent
+        wait: true
+      with_items:
+        - cluster_role_binding.yaml
+
+    - name: Destroy namespace
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: '{{ namespace }}'
+        state: absent
+        wait: true
+
