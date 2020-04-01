@@ -1,0 +1,40 @@
+---
+- name: Prepare operator resources
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
+  tasks:
+    - name: Create Custom Resource Definition
+      k8s:
+        definition: "{{ lookup('file', item) }}"
+      with_fileglob:
+        - "{{ deploy_dir }}/crds/apps.fedoraproject.org_*_crd.yaml"
+
+    - name: Ensure specified namespace is present
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: '{{ namespace }}'
+
+    - name: Create RBAC resources
+      k8s:
+        definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
+        namespace: '{{ namespace }}'
+      with_items:
+        - role.yaml
+        - role_binding.yaml
+        - service_account.yaml
+
+    - name: Create cluster RBAC resources
+      k8s:
+        definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
+      with_items:
+        - cluster_role_binding.yaml
+
+    - name: Create operator deployment
+      k8s:
+        definition: "{{ lookup('file', tmpdir + '/operator.yaml') }}"
+        namespace: "{{ namespace }}"
+        wait: true
