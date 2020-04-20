@@ -3,7 +3,8 @@
   dnf:
     name: [
             golang,
-            docker
+            docker,
+            kubernetes-client
           ]
     state: present
 
@@ -75,6 +76,9 @@
 
 - name: Start minikube cluster
   command: minikube start
+
+- name: Enable ingress addon for minikube
+  command: minikube addons enable ingress
 
 # "Install" the operator SDK
 - name: Retrieve binary
