@@ -19,7 +19,7 @@ provisioner:
       all:
         namespace: ${TEST_NAMESPACE:-osdk-test}
         tmpdir: /tmp/mbox
-        operator_image: quay.io/fedora/mbox-operator:latest
+        operator_image: quay.io/lrossett/mbox-operator:latest
   lint:
     name: ansible-lint
     enabled: false
@@ -32,13 +32,12 @@ scenario:
     - destroy
     - dependency
     - syntax
-    # add a create playbook to create crs
-    # - create
     - prepare
+    - create
     - converge
     - side_effect
     - verify
-    - destroy
+    #- destroy
 verifier:
   name: testinfra
   lint: |

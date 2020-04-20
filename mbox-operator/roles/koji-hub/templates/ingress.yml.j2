@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ koji_hub_ingress_name }}
+  labels:
+    app: koji-hub
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /kojihub
+            pathType: Prefix
+            backend:
+              serviceName: {{ koji_hub_ingress_svc }}
+              servicePort: {{ koji_hub_ingress_port }}

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koji-hub
+  labels:
+    app: koji-hub
+spec:
+  replicas: {{ koji_hub_replicas|int }}
+  selector: 
+    matchLabels:
+      app: koji-hub
+  template:
+    metadata:
+      labels:
+        app: koji-hub
+    spec:
+      containers:
+        - name: koji-hub
+          image: "{{ koji_hub_image }}"
+          livenessProbe:
+            tcpSocket:
+              port: {{ koji_hub_http_port }}
+          readinessProbe:
+            exec:
+              command:
+                - /readiness.sh
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          ports:
+            - containerPort: {{ koji_hub_http_port }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/koji-hub
+              readOnly: true
+            - name: cacert-volume
+              mountPath: /etc/cacert
+              readOnly: true
+            - name: service-cert-volume
+              mountPath: /etc/servicecert
+              readOnly: true
+            - name: koji-hub-httpd
+              mountPath: /httpdir
+            - name: koji-hub-mnt
+              mountPath: /mnt/koji
+            - name: koji-hub-msg
+              mountPath: /etc/msgcert
+      volumes:
+        - name: cacert-volume
+          secret:
+            secretName: cacert
+        - name: service-cert-volume
+          secret:
+            secretName: service-cert
+        - name: config-volume
+          configMap:
+            name: koji-hub-configmap
+        - name: koji-hub-httpd
+          persistentVolumeClaim:
+            claimName: koji-hub-httpd-pvc
+        - name: koji-hub-mnt
+          persistentVolumeClaim:
+            claimName: koji-hub-mnt-pvc
+        - name: koji-hub-msg
+          configMap:
+            name: {{ koji_hub_messaging_cert_cm }}

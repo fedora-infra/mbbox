@@ -7,11 +7,14 @@
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
     deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
-    crd_path: 'crds/apps.fedoraproject.org_mboxes_crd.yaml'
+    crd_paths:
+      - 'crds/apps.fedoraproject.org_mboxes_crd.yaml'
+      - 'crds/apps.fedoraproject.org_mbkojihubs_crd.yaml'
   tasks:
     - name: Create Custom Resource Definition
       k8s:
-        definition: "{{ lookup('file', '/'.join([deploy_dir, crd_path])) }}"
+        definition: "{{ lookup('file', '/'.join([deploy_dir, item])) }}"
+      with_items: "{{ crd_paths }}"
 
     - name: Ensure specified namespace is present
       k8s:
@@ -27,3 +30,4 @@
         - role.yaml
         - role_binding.yaml
         - service_account.yaml
+

@@ -3,3 +3,8 @@
   group: apps.fedoraproject.org
   kind: Mbox
   role: /opt/ansible/roles/mbox
+
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: MBKojiHub
+  role: /opt/ansible/roles/koji-hub

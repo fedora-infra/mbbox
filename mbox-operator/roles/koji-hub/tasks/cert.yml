@@ -1,0 +1,46 @@
+- openssl_privatekey:
+    path: /tmp/{{ cert_name }}.pem
+    size: 4096
+
+- openssl_csr:
+    path: /tmp/{{ cert_name }}.csr
+    privatekey_path: /tmp/{{ cert_name }}.pem
+
+- openssl_certificate:
+    path: /tmp/{{ cert_name }}.crt
+    privatekey_path: /tmp/{{ cert_name }}.pem
+    csr_path: /tmp/{{ cert_name }}.csr
+    provider: selfsigned
+
+- template:
+    src: cert-secret.yml.j2
+    dest: /tmp/cert-secret.yml
+  vars:
+    ca_data: "{{ lookup('file', '/tmp/' + cert_name + '.crt') }}"
+    cert_data: "{{ lookup('file', '/tmp/' + cert_name + '.crt') }}"
+    key_data: "{{ lookup('file', '/tmp/' + cert_name + '.pem') }}"
+
+- k8s:
+    state: present
+    src: /tmp/cert-secret.yml
+    wait: true
+    namespace: "{{ meta.namespace }}"
+
+- k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ cert_name }}"
+    namespace: "{{ meta.namespace }}"
+  register: kojihub_ca_secret
+  until: kojihub_ca_secret.resources|length > 0
+  delay: 3
+  retries: 10
+
+- file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /tmp/cert-secret.yml
+    - /tmp/{{ cert_name }}.pem
+    - /tmp/{{ cert_name }}.crt
+    - /tmp/{{ cert_name }}.csr

@@ -27,12 +27,6 @@
         - role_binding.yaml
         - service_account.yaml
 
-    - name: Create cluster RBAC resources
-      k8s:
-        definition: "{{ lookup('template', '/'.join([deploy_dir, item])) }}"
-      with_items:
-        - cluster_role_binding.yaml
-
     - name: Create operator deployment
       k8s:
         definition: "{{ lookup('file', tmpdir + '/operator.yaml') }}"

@@ -1,0 +1,22 @@
+---
+# defaults file for koji-hub
+koji_hub_image: quay.io/fedora/koji-hub:latest
+koji_hub_replicas: 1
+
+koji_hub_configmap: koji-hub-configmap
+koji_hub_cacert_secret: koji-hub-cacert
+koji_hub_service_cert_secret: "{{ service_cert_secret | default('service-cert') }}"
+koji_hub_messaging_cert_cm: "{{ messaging_cert_cm | default('koji-hub-msg') }}"
+
+koji_hub_httpd_pvc_name: koji-hub-httpd-pvc
+koji_hub_httpd_pvc_size: 1Gi
+
+koji_hub_mnt_pvc_name: koji-hub-mnt-pvc
+koji_hub_mnt_pvc_size: 10Gi
+
+koji_hub_http_port: "8080"
+koji_hub_https_port: "8443"
+koji_hub_svc_name: koji-hub
+koji_hub_http_enabled: "{{ http_enabled|default(false) }}"
+koji_hub_https_enabled: "{{ https_enabled|default(true) }}"
+koji_hub_host: "{{ host|default('kojihub.mbox.dev') }}"

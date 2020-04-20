@@ -1,0 +1,1 @@
+- import_playbook: '{{ playbook_dir }}/../default/create.yml'
