@@ -1,46 +1,80 @@
-- openssl_privatekey:
-    path: /tmp/{{ cert_name }}.pem
-    size: 4096
+- set_fact:
+    cert_name: foobar
 
-- openssl_csr:
-    path: /tmp/{{ cert_name }}.csr
-    privatekey_path: /tmp/{{ cert_name }}.pem
+- name: Root CA creation
+  block:
+    - openssl_privatekey:
+        path: /tmp/{{ cert_name }}_ca_key.pem
+        size: 4096
+    - openssl_csr:
+        path: /tmp/{{ cert_name }}_ca_req.csr
+        privatekey_path: /tmp/{{ cert_name }}_ca_key.pem
+        common_name: "{{ koji_hub_host }}"
+    - openssl_certificate:
+        path: /tmp/{{ cert_name }}_ca_cert.crt
+        privatekey_path: /tmp/{{ cert_name }}_ca_key.pem
+        csr_path: /tmp/{{ cert_name }}_ca_req.csr
+        provider: selfsigned
 
-- openssl_certificate:
-    path: /tmp/{{ cert_name }}.crt
-    privatekey_path: /tmp/{{ cert_name }}.pem
-    csr_path: /tmp/{{ cert_name }}.csr
-    provider: selfsigned
+- name: Server certificate creation
+  block:
+    - openssl_privatekey:
+        path: /tmp/{{ cert_name }}_server_key.pem
+        size: 4096
+    - openssl_csr:
+        path: /tmp/{{ cert_name }}_server_req.csr
+        privatekey_path: /tmp/{{ cert_name }}_server_key.pem
+        common_name: "{{ koji_hub_host }}"
+    - openssl_certificate:
+        path: /tmp/{{ cert_name }}_server_cert.crt
+        csr_path: /tmp/{{ cert_name }}_server_req.csr
+        ownca_path: /tmp/{{ cert_name }}_ca_cert.crt
+        ownca_privatekey_path: /tmp/{{ cert_name }}_ca_key.pem
+        provider: ownca
 
-- template:
-    src: cert-secret.yml.j2
-    dest: /tmp/cert-secret.yml
-  vars:
-    ca_data: "{{ lookup('file', '/tmp/' + cert_name + '.crt') }}"
-    cert_data: "{{ lookup('file', '/tmp/' + cert_name + '.crt') }}"
-    key_data: "{{ lookup('file', '/tmp/' + cert_name + '.pem') }}"
+- name: Kubernetes root ca secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ koji_hub_ca_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: cacert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ koji_hub_ca_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: koji-hub
+          data:
+            csr: "{{ lookup('file', '/tmp/' + cert_name + '_server_req.csr') | b64encode }}"
+            cert: "{{ lookup('file', '/tmp/' + cert_name + '_ca_cert.crt') | b64encode }}"
+            key: "{{ lookup('file', '/tmp/' + cert_name + '_ca_key.pem') | b64encode }}"
+      when: cacert_query.resources|length == 0
 
-- k8s:
-    state: present
-    src: /tmp/cert-secret.yml
-    wait: true
-    namespace: "{{ meta.namespace }}"
 
-- k8s_info:
-    api_version: v1
-    kind: Secret
-    name: "{{ cert_name }}"
-    namespace: "{{ meta.namespace }}"
-  register: kojihub_ca_secret
-  until: kojihub_ca_secret.resources|length > 0
-  delay: 3
-  retries: 10
-
-- file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - /tmp/cert-secret.yml
-    - /tmp/{{ cert_name }}.pem
-    - /tmp/{{ cert_name }}.crt
-    - /tmp/{{ cert_name }}.csr
+- name: Kubernetes server certificate secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ koji_hub_service_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: servicecert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ koji_hub_service_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: koji-hub
+          data:
+            tls.crt: "{{ lookup('file', '/tmp/' + cert_name + '_server_cert.crt') | b64encode }}"
+            tls.key: "{{ lookup('file', '/tmp/' + cert_name + '_server_key.pem') | b64encode }}"
+          type: kubernetes.io/tls
+      when: servicecert_query.resources|length == 0

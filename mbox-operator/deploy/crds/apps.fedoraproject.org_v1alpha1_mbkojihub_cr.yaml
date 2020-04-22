@@ -7,13 +7,14 @@ metadata:
 spec:
   replicas: 1
   persistent: true
-  host: ''
+  host: 'mbox.dev'
   configmap: koji-hub
-  cacert_secret: cacert
-  service_cert_secret: service-cert
+  ca_cert_secret: koji-hub-ca-cert
+  service_cert_secret: koji-hub-service-cert
   postgres_secret: postgres
   http_enabled: true
   https_enabled: true
   topic_prefix: mbox_dev
   fedora_messaging_url: amqps://koji:something@rabbitmq
   messaging_cert_cm: koji-hub-msg
+  ingress_backend: nginx
