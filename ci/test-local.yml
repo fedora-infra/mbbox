@@ -1,0 +1,15 @@
+ - hosts: all
+   tasks:
+    - name: List project directory on the test system
+      command: ls -al {{ansible_user_dir}}/{{zuul.project.src_dir}}
+    - name: Install git, pip and podman
+      become: true
+      package:
+        name: ['git', 'podman', 'python3-pip']
+        state: present
+    - name: Install libraries through pip 
+      become: true
+      pip:
+        name: ['molecule', 'kubernetes', 'openshift', 'docker', 'jmespath', 'yamllint']
+    - name: Run molecule 
+      command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-local

@@ -1,0 +1,37 @@
+ - hosts: all
+   tasks:
+    - name: List project directory on the test system
+      command: ls -al {{ansible_user_dir}}/{{zuul.project.src_dir}}
+    - name: Install dependencies
+      become: true
+      package:
+        name: ['git', 'moby-engine', 'python3-pip', 'container-selinux', 'selinux-policy-base']
+        state: present
+    - name: Install k3s selinux settings
+      become: true
+      dnf:
+        name: https://rpm.rancher.io/k3s-selinux-0.1.1-rc1.el7.noarch.rpm
+        state: present
+    - name: Install test deps through pip
+      become: true
+      pip:
+        name: ['molecule', 'kubernetes', 'openshift', 'docker', 'jmespath', 'yamllint']
+    - name: Get k3d install script
+      get_url: url=https://raw.githubusercontent.com/rancher/k3s/master/install.sh dest=/tmp mode='0777'
+    - name: Install k3s
+      command: /tmp/install.sh
+      become: true
+    - name: Wait for port 6443
+      wait_for:
+        port: 6443
+        delay: 40
+    - name: Copy k3s config
+      command: cp /etc/rancher/k3s/k3s.yaml /tmp/k3s.yaml
+      become: true
+    - name: Make k3s config publicly accessible
+      command: chmod 777 /tmp/k3s.yaml 
+      become: true
+    - name: Run molecule test-cluster
+      command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-cluster
+      environment: 
+        KUBECONFIG: "/tmp/k3s.yaml"
