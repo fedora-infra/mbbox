@@ -28,6 +28,7 @@ spec:
             periodSeconds: 15
           ports:
             - containerPort: {{ koji_hub_http_port }}
+            - containerPort: {{ koji_hub_https_port }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/koji-hub
@@ -47,19 +48,19 @@ spec:
       volumes:
         - name: cacert-volume
           secret:
-            secretName: cacert
+            secretName: "{{ koji_hub_ca_cert_secret }}"
         - name: service-cert-volume
           secret:
-            secretName: service-cert
+            secretName: "{{ koji_hub_service_cert_secret }}"
         - name: config-volume
           configMap:
-            name: koji-hub-configmap
+            name: "{{ koji_hub_configmap }}"
         - name: koji-hub-httpd
           persistentVolumeClaim:
-            claimName: koji-hub-httpd-pvc
+            claimName: "{{ koji_hub_httpd_pvc_name }}"
         - name: koji-hub-mnt
           persistentVolumeClaim:
-            claimName: koji-hub-mnt-pvc
+            claimName: "{{ koji_hub_mnt_pvc_name }}"
         - name: koji-hub-msg
           configMap:
             name: {{ koji_hub_messaging_cert_cm }}

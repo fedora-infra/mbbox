@@ -5,8 +5,6 @@
   connection: local
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
-    koji_configmap: koji-hub-configmap
-    kojihub_cacert_secret: cacert
   tasks:
       - block:
         - name: 'TEST: koji_hub.configmap'
@@ -14,7 +12,7 @@
             api_version: v1
             kind: ConfigMap
             namespace: "{{ namespace }}"
-            name: "{{ koji_configmap }}"
+            name: koji-hub
           register: koji_configmap
         - assert:
             that:
@@ -26,18 +24,33 @@
               - "'fedora-messaging.toml' in koji_configmap.resources[0].data"
 
       - block:
-          - name: 'TEST: kojihub.secret.cacert'
+          - name: 'TEST: kojihub.secret.koji-hub-ca-cert'
             k8s_info:
               api_version: v1
               kind: Secret
               namespace: "{{ namespace }}"
-              name: "{{ kojihub_cacert_secret }}"
+              name: koji-hub-ca-cert
             register: kojihub_secrets
           - assert:
               that:
                 - kojihub_secrets.resources|length == 1                
                 - kojihub_secrets.resources[0].metadata.labels['app'] == 'koji-hub'
                 - "'cert' in kojihub_secrets.resources[0].data"
+
+      - block:
+          - name: 'TEST: kojihub.secret.koji-hub-service-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: koji-hub-service-cert
+            register: kojihub_secrets
+          - assert:
+              that:
+                - kojihub_secrets.resources|length == 1                
+                - kojihub_secrets.resources[0].metadata.labels['app'] == 'koji-hub'
+                - "'tls.crt' in kojihub_secrets.resources[0].data"
+                - "'tls.key' in kojihub_secrets.resources[0].data"
 
       - block:
           - name: 'TEST: kojihub.pvcs'

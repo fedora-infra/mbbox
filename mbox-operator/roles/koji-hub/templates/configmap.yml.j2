@@ -6,6 +6,7 @@ metadata:
     app: koji-hub
 data:
   httpd.conf: |-
+    ServerName "{{ koji_hub_host }}"
     ServerRoot "/httpdir"
     PidFile "/httpdir/httpd.pid"
     LoadModule authn_file_module modules/mod_authn_file.so
@@ -42,6 +43,25 @@ data:
     AddDefaultCharset UTF-8
     CoreDumpDirectory /tmp
     Listen 0.0.0.0:{{ koji_hub_http_port }} http
+{% if koji_hub_https_enabled %}
+    Listen 0.0.0.0:{{ koji_hub_https_port }} https
+{% endif %}
+
+    <VirtualHost *:{{ koji_hub_http_port }}>
+        ServerName "{{ koji_hub_host }}"
+        TypesConfig /etc/mime.types
+        AddDefaultCharset UTF-8
+    </VirtualHost>
+
+{% if koji_hub_https_enabled %}
+    <VirtualHost *:{{ koji_hub_https_port }}>
+        ServerName "{{ koji_hub_host }}"
+        TypesConfig /etc/mime.types
+        AddDefaultCharset UTF-8
+        SSLEngine on
+        SSLProtocol TLSv1.2
+    </VirtualHost>
+{% endif %}
 
     WSGIDaemonProcess koji_hub display-name=koji_hub processes=2 threads=2 maximum-requests=1000 home=/httpdir
     WSGIPythonPath /usr/share/koji-hub/

@@ -48,37 +48,7 @@
         path: /tmp/configmap.yml
         state: absent
 
-- block:
-    - name: Ensure cacert exists
-      k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ cacert_secret | default(koji_hub_cacert_secret) }}"
-        namespace: "{{ meta.namespace }}"
-      register: k8s_cacert
-
-    - include_tasks: cert.yml
-      vars:
-        cert_name: "{{ cacert_secret | default(koji_hub_cacert_secret) }}"
-        cert_key_name: cert
-        pk_key_name: key
-      when: k8s_cacert.resources|length == 0
-
-- block:
-    - name: Ensure service cert exists
-      k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ service_cert_secret | default(koji_hub_service_cert_secret) }}"
-        namespace: "{{ meta.namespace }}"
-      register: k8s_cacert
-
-    - include_tasks: cert.yml
-      vars:
-        cert_name: "{{ service_cert_secret | default(koji_hub_service_cert_secret) }}"
-        cert_key_name: tls.crt
-        pk_key_name: tls.key
-      when: k8s_cacert.resources|length == 0
+- include_tasks: cert.yml
 
 - name: PVC creation
   include_tasks: pvc.yml
