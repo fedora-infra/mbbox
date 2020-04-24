@@ -1,9 +1,13 @@
+![rtd status](https://mbbox-operator.readthedocs.io/en/latest/)
+
 # mbox
 Module Building in a Box
 
 This repository contains a set of scripts used to set up a buildsystem that can be used for Fedora/RHEL Modular packages, based on [Koji](https://pagure.io/koji/) and [Module Build Service](https://pagure.io/fm-orchestrator/).
 
 The intention is for it to be trivially simple to get started with both, but also allow the same setup to be used for a production setup.
+
+Full documentation can be found at: https://mbbox-operator.readthedocs.io/en/latest/
 
 ## Usage
 
