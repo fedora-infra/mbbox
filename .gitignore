@@ -2,3 +2,4 @@ state/
 mbox/__pycache__
 openshift.local.clusterup/
 .vagrant/
+docs/build
