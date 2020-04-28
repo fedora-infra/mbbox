@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: identity-postgres
+  labels:
+    app: identity-postgres
+data:
+  POSTGRES_HOST: cG9zdGdyZXNxbA== #postgresql
+  POSTGRES_DB: bWJveGRi #mboxdb
+  POSTGRES_USER: bWJveA== #koji
+  POSTGRES_PASS: bWJveA== #mbox
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity
+  labels:
+    app: identity
+    service: identity
+spec:
+  ports:
+    - name: web
+      port: 8443
+      targetPort: 8443
+  selector:
+    deploymentconfig: identity
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: idenity-httpd
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: identity-configmap
+data:
+  httpd.conf: |-
+    ServerRoot "/httpdir"
+    PidFile "/httpdir/httpd.pid"
+    LoadModule authn_file_module modules/mod_authn_file.so
+    LoadModule authn_anon_module modules/mod_authn_anon.so
+    LoadModule authz_user_module modules/mod_authz_user.so
+    LoadModule authz_host_module modules/mod_authz_host.so
+    LoadModule include_module modules/mod_include.so
+    LoadModule log_config_module modules/mod_log_config.so
+    LoadModule env_module modules/mod_env.so
+    LoadModule ext_filter_module modules/mod_ext_filter.so
+    LoadModule expires_module modules/mod_expires.so
+    LoadModule headers_module modules/mod_headers.so
+    LoadModule mime_module modules/mod_mime.so
+    LoadModule status_module modules/mod_status.so
+    LoadModule dir_module modules/mod_dir.so
+    LoadModule alias_module modules/mod_alias.so
+    LoadModule rewrite_module modules/mod_rewrite.so
+    LoadModule version_module modules/mod_version.so
+    LoadModule wsgi_module modules/mod_wsgi_python3.so
+    LoadModule authn_core_module modules/mod_authn_core.so
+    LoadModule authz_core_module modules/mod_authz_core.so
+    LoadModule unixd_module modules/mod_unixd.so
+    LoadModule mpm_event_module modules/mod_mpm_event.so
+    LoadModule ssl_module modules/mod_ssl.so
+    ServerName identity
+    StartServers  20
+    ServerLimit   100
+    MaxRequestsPerChild 2000
+    MaxRequestWorkers 100
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    CustomLog /dev/stdout combined
+    ErrorLog /dev/stderr
+    LogLevel debug
+    TypesConfig /etc/mime.types
+    AddDefaultCharset UTF-8
+    CoreDumpDirectory /tmp
+    Listen 0.0.0.0:8443 https
+    SSLEngine on
+    SSLProtocol TLSv1.2
+
+    SSLCertificateFile /etc/servicecert/tls.crt
+    SSLCertificateKeyFile /etc/servicecert/tls.key
+    SSLCertificateChainFile /etc/cacert/cert
+
+    Include /etc/ipsilon/httpd/*.conf
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      labels:
+        app: identity
+    spec:
+      containers:
+        - name: identity
+          image: quay.io/fedora/identity:latest
+          imagePullPolicy: Always
+          #uncomment to debug pod
+          #command:
+          #  - sleep
+          #  - infinity
+          ports:
+            - containerPort: 8443
+          envFrom:
+            - secretRef:
+                name: identity-postgres
+          volumeMounts:
+            - name: identity-httpd
+              mountPath: /httpdir
+            - name: identity-config
+              mountPath: /etc/ipsilon-cfg/httpd
+            - name: service-cert
+              mountPath: /etc/servicecert
+            - name: service-ca
+              mountPath: /etc/cacert
+      volumes:
+        - name: identity-httpd
+          persistentVolumeClaim:
+            claimName: idenity-httpd
+        - name: identity-config
+          configMap:
+            name: identity-configmap
+        - name: service-cert
+          secret:
+            secretName: service-cert
+        - name: service-ca
+          secret:
+            secretName: service-ca
