@@ -1,0 +1,18 @@
+[globals]
+datadir = /etc/ipsilon/data
+httpdconfd = /etc/ipsilon/httpd
+confdir = /etc/ipsilon/ipsilon
+
+[arguments]
+ignored_database_url = postgresql://%(PSQL_USER):%(PSQL_PASS)@%(PSQL_HOST)/%(PSQL_DB)
+admin_user = admin
+gssapi = no
+ipa = no
+port = 8443
+testauth = yes
+openidc = yes
+hostname = identity.mbox.test
+server_debugging = True
+root_instance = yes
+instance = root
+pam = no
