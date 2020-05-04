@@ -1,8 +1,20 @@
 #!/bin/bash
 
-#cp cacert/cert /etc/pki/ca-trust/source/anchors/mbox_ca.pem
+if [ "${KOJI_HUB_CA_CERT_PATH}" == "" ]; then
+  KOJI_HUB_CA_CERT_PATH="/etc/cacert/cert"
+fi
 
+ln -s ${KOJI_HUB_CA_CERT_PATH} /etc/pki/tls/certs/`openssl x509 -hash -noout -in ${KOJI_HUB_CA_CERT_PATH}`.0
 update-ca-trust
+
+if [ ! -f "/var/cache/kojihub/.dbschema" ]; then
+  PGPASSWORD="${POSTGRES_PASSWORD}" psql \
+  -h ${POSTGRES_HOST} \
+  -U ${POSTGRES_USER} \
+  -W ${POSTGRES_DB} < /usr/share/doc/koji/docs/schema.sql
+
+  touch /var/cache/kojihub/.dbschema
+fi
 
 mkdir -p /httpdir/run/
 ln -s /usr/lib64/httpd/modules /httpdir/modules

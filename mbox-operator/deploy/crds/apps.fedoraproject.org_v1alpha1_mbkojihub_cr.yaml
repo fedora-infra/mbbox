@@ -5,6 +5,7 @@ metadata:
   labels:
     app: mb-koji-hub
 spec:
+  image: quay.io/fedora/koji-hub:latest
   replicas: 1
   persistent: true
   host: 'mbox.dev'

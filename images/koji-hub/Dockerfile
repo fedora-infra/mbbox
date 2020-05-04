@@ -2,12 +2,15 @@ FROM fedora:31
 
 RUN dnf install --setopt tsflags= -y \
 koji koji-hub koji-web koji-hub-plugins \
-curl httpd mod_ssl postgresql fedora-messaging python3-mod_wsgi 
+curl httpd mod_ssl postgresql fedora-messaging python3-mod_wsgi
 
 RUN curl https://infrastructure.fedoraproject.org/cgit/ansible.git/plain/roles/koji_hub/templates/fedmsg-koji-plugin.py -o /usr/lib/koji-hub-plugins/fedmsg-koji-plugin.py
 RUN rm -f /etc/kojiweb/web.conf && \
 ln -s /etc/koji-hub/kojiweb.conf /etc/kojiweb/web.conf
-RUN chown -R 1001:root /etc/koji-hub
+RUN chown -R 1001:root /etc/koji-hub && \
+chown -R 1001:root /etc/pki/tls
+RUN mkdir -p /var/cache/kojihub && \
+chown -R 1001:root /var/cache/kojihub
 
 COPY readiness.sh /readiness.sh
 COPY entrypoint.sh /entrypoint.sh
