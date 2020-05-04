@@ -29,6 +29,9 @@ spec:
           ports:
             - containerPort: {{ koji_hub_http_port }}
             - containerPort: {{ koji_hub_https_port }}
+          envFrom:
+            - secretRef:
+                name: {{ koji_hub_postgres_secret }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/koji-hub

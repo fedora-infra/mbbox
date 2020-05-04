@@ -5,7 +5,7 @@ BODY='<?xml version="1.0" encoding="utf-8"?><methodCall><methodName>system.listM
 res=$(curl \
 -X POST \
 -H 'Content-Type: text/xml' \
--d '$BODY' \
+-d "$BODY" \
 http://127.0.0.1:8080/kojihub/)
 
 if [ "$?" != '0' ]
