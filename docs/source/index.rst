@@ -10,6 +10,7 @@ mbox-operator
    :maxdepth: 2
    :caption: Contents:
 
+   user-guide/index
    contributing
 
 
