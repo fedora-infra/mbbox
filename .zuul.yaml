@@ -6,8 +6,13 @@
     name: test-local
     run: ci/test-local.yml
     nodeset: fedora-30-vm
+- job:
+    name: test-docs
+    run: ci/test-docs.yml
+    nodeset: fedora-30-vm
 - project:
     check:
       jobs:
         - test-cluster
+        - test-docs
 
