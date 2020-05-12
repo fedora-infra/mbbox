@@ -1,0 +1,10 @@
+ - hosts: all
+   tasks:
+    - name: install dependencies
+      pip:
+        name: sphinx
+        extra_args: --user
+    - name: Build html documentation
+      command: make html
+      args:
+        chdir: "{{ansible_user_dir}}/{{zuul.project.src_dir}}/docs"
