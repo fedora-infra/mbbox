@@ -7,7 +7,9 @@
            vim-enhanced,
            python3-black,
            tmux,
-           htop
+           htop,
+           make,
+           python3-sphinx
           ]
     state: present
 
