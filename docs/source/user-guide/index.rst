@@ -7,3 +7,4 @@ User Guide
    :caption: Contents:
 
    koji-hub
+   koji-builder
