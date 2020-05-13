@@ -6,8 +6,6 @@ driver:
   options:
     managed: true
     ansible_connection_options: {}
-lint: |
-  yamllint roles/
 platforms:
   - name: test-cluster
     groups:
@@ -28,7 +26,6 @@ provisioner:
 scenario:
   name: test-cluster
   test_sequence:
-    - lint
     - destroy
     - dependency
     - syntax

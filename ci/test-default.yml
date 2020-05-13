@@ -1,0 +1,14 @@
+ - hosts: all
+   tasks:
+    - name: Install dependencies
+      become: true
+      package:
+        name: ['git', 'moby-engine', 'python3-pip', 'container-selinux', 'selinux-policy-base']
+        state: present
+    - name: Install test deps through pip
+      become: true
+      pip:
+        name: ['molecule', 'kubernetes', 'openshift', 'docker', 'jmespath', 'yamllint']
+      become: true
+    - name: Run molecule test (the default only runs lint)
+      command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule test
