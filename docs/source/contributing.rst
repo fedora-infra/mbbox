@@ -28,6 +28,38 @@ Tests can be run using either molecule or operator-sdk cli (which uses molecule 
   molecule test -s test-cluster #needs a remote cluster, minikube is enough
   operator-sdk test local #runs local tests as well, just a molecule cli wrapper
 
+Debugging Local Tests
+---------------------
+
+If you encounter any error when running test you can debug the issue by connecting to local instance of kubernetes running in docker:
+
+.. code-block:: bash
+
+   molecule converge -s test-local #runs local test without destroy sequence
+   docker ps #find container named kind-test-local
+   docker exec -it <container_id> bash #<container_id> of container from previous command
+   kubectl config set-context --current --namespace=osdk-test #sets namespace to operator-sdk
+
+Here are few useful commands for debugging, for another commands look at `kubectl help`:
+
+.. code-block:: bash
+
+   kubectl get all #returns all resources in the current namespace
+   kubectl logs <pod> #shows logs for specific <pod>
+   kubectl logs <mbox-operator-pod> ansible #shows ansible logs for <mbox-operator-pod>
+   kubectl describe <resource> #shows detailed information about specific <resource>
+   kubectl get ingress #returns all ingress resources, is not part of get all
+
+Troubleshooting
+---------------
+
+During the development, we encountered some issues when debugging operator deployment. We will try to document them in this section, together with solutions.
+
+Issue: Timeout in reconciliation task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This was caused by low space, because failing tests aren't removing docker volumes when they fails. To remove the volumes run following command `docker volume prune`.
+
 Environment
 ===========
 
@@ -41,3 +73,18 @@ We are providing a full development environment in Vagrant but you can use your 
 * docker >= 19
 
 NOTE: make sure both ansible and molecule are system-wide installed using in the same python interpreter otherwise you may have issues running tests.
+
+Setting Up Vagrant Environment
+------------------------------
+
+To start the vagrant operator SDK box, run the following in project root:
+
+.. code-block:: bash
+
+   vagrant up mbbox_osdk #starts the vagrant VM, it could take a while
+   vagrant ssh mbbox_osdk #connects you to the vagrant VM
+
+In vagrant VM you can find project folder in `~/devel`.
+To run the tests do `cd ~/devel/mbox-operator` and follow `E2E Tests`_ section.
+
+If you encounter any issue with `vagrant up mbbox_osdk` command, do `vagrant destroy mbbox_osdk` to be sure that there isn't any leftover from previous run.
