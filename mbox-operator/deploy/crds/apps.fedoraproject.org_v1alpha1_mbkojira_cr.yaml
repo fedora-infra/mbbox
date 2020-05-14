@@ -1,0 +1,9 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBKojira
+metadata:
+  name: mb-kojira
+  labels:
+    app: mb-kojira
+spec:
+  # Add fields here
+  size: 3

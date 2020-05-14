@@ -13,3 +13,8 @@
   group: apps.fedoraproject.org
   kind: MBKojiBuilder
   role: /opt/ansible/roles/koji-builder
+
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: MBKojira
+  role: /opt/ansible/roles/kojira

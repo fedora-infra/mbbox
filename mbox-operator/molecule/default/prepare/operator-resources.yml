@@ -6,10 +6,6 @@
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
     deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
-    crd_paths:
-      - 'crds/apps.fedoraproject.org_mboxes_crd.yaml'
-      - 'crds/apps.fedoraproject.org_mbkojihubs_crd.yaml'
-      - 'crds/apps.fedoraproject.org_mbkojibuilders_crd.yaml'
   tasks:
     - name: Create Custom Resource Definition
       k8s:
