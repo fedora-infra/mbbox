@@ -5,10 +5,11 @@ metadata:
   name: mbox-operator
 rules:
 - apiGroups:
-  - "networking.k8s.io"
+  - networking.k8s.io
   resources:
   - ingresses
-  verbs: ["*"]
+  verbs:
+  - '*'
 - apiGroups:
   - ""
   resources:
@@ -77,6 +78,7 @@ rules:
   - '*'
   - mbkojihubs
   - mbkojibuilders
+  - mbkojiras
   verbs:
   - create
   - delete
