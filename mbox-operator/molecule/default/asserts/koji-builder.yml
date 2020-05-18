@@ -45,7 +45,7 @@
             register: kojibuilder_pvcs
           - assert:
               that:
-                - kojibuilder_pvcs.resources|length == 1
+                - kojibuilder_pvcs.resources|length > 0 # TODO: probably needs to have better cleanup phase to be exact
                 - kojibuilder_pvcs.resources[0].metadata.labels['app'] == 'koji-builder'
                 - "'ReadWriteOnce' in kojibuilder_pvcs.resources[0].spec.accessModes"
                 - "kojibuilder_pvcs.resources[0].spec.resources.requests.storage == '10Gi'"

@@ -1,7 +1,7 @@
 - job:
     name: test-cluster
     run: ci/test-cluster.yml
-    nodeset: fedora-30-vm
+    nodeset: fedora-30-vm-medium
 - job:
     name: test-local
     run: ci/test-local.yml

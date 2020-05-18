@@ -1,5 +1,5 @@
 ---
-- name: Prepare
+- name: Prepare local cluster
   hosts: k8s
   gather_facts: false
   vars:

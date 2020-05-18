@@ -4,8 +4,9 @@ dependency:
 driver:
   name: delegated
   options:
-    managed: true
-    ansible_connection_options: {}
+    managed: False
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
   - name: test-cluster
     groups:
@@ -30,8 +31,8 @@ scenario:
     - dependency
     - syntax
     - prepare
-#    - create
-#    - converge
+    - create
+    - converge
     - side_effect
     - verify
     #- destroy
