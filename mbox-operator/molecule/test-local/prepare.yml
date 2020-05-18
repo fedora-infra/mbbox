@@ -2,4 +2,3 @@
 - import_playbook: ../default/prepare/local-cluster.yml
 
 - import_playbook: ../default/prepare/operator-resources.yml
-

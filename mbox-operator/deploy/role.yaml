@@ -80,6 +80,7 @@ rules:
   - mbkojibuilders
   - mbkojiras
   - mbmbsbackends
+  - mbmbsfrontends
   verbs:
   - create
   - delete
