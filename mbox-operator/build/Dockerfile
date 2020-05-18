@@ -1,5 +1,10 @@
 FROM quay.io/operator-framework/ansible-operator:v0.16.0
 
+USER root
+RUN dnf install gcc libpq libpq-devel python3-devel -y
+RUN pip3.6 install psycopg2
+USER ${USER_ID}
+
 COPY requirements.yml ${HOME}/requirements.yml
 RUN ansible-galaxy collection install -r ${HOME}/requirements.yml \
     && chmod -R ug+rwx ${HOME}/.ansible
