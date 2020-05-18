@@ -1,6 +1,7 @@
 ---
 - name: Build Operator in Kubernetes docker container
   hosts: k8s
+  gather_facts: false
   vars:
     image_name: apps.fedoraproject.org/mbox-operator:testing
     dockerfile_path: /build/build/Dockerfile
@@ -17,5 +18,5 @@
       changed_when: not prev_hash.stdout or (prev_hash.stdout and prev_hash.stdout not in ''.join(build_cmd.stdout_lines[-2:]))
 
 
-- import_playbook: '{{ playbook_dir }}/converge/converge_koji-hub.yml'
-- import_playbook: '{{ playbook_dir }}/converge/converge_koji-builder.yml'
+- import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-hub.yml'
+- import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-builder.yml'

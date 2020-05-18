@@ -40,7 +40,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mbbox_os311.vm.host_name = "mbbox-os311.example.com"
     # bootstrap and run with ansible
     mbbox_os311.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/mbbox-os311-playbook.yml"
+      ansible.playbook = "ci/mbbox-os311-playbook.yml"
       ansible.raw_arguments = ["-e", "ansible_python_interpreter=/usr/bin/python3"]
     end
 
@@ -67,7 +67,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mbbox_osdk.vm.host_name = "mbbox-osdk.example.com"
     # bootstrap and run with ansible
     mbbox_osdk.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/mbbox-osdk-playbook.yml"
+      ansible.playbook = "ci/mbbox-osdk-playbook.yml"
       ansible.raw_arguments = ["-e", "ansible_python_interpreter=/usr/bin/python3"]
     end
 

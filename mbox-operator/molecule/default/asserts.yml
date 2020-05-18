@@ -1,2 +1,0 @@
-- import_playbook: '{{ playbook_dir }}/asserts/koji-hub.yml'
-- import_playbook: '{{ playbook_dir }}/asserts/koji-builder.yml'
