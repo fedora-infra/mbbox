@@ -23,3 +23,8 @@
   group: apps.fedoraproject.org
   kind: MBMbsBackend
   role: /opt/ansible/roles/mbs-backend
+
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: MBMbsFrontend
+  role: /opt/ansible/roles/mbs-frontend

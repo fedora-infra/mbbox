@@ -1,0 +1,9 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBMbsFrontend
+metadata:
+  name: mb-mbs-frontend
+  labels:
+    app: mb-mbs-frontend
+spec:
+  # Add fields here
+  size: 3
