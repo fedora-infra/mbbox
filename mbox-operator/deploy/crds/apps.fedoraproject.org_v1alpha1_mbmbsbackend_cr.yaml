@@ -1,0 +1,7 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBMbsBackend
+metadata:
+  name: example-mbmbsbackend
+spec:
+  # Add fields here
+  size: 3

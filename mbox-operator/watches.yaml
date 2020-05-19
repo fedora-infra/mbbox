@@ -18,3 +18,8 @@
   group: apps.fedoraproject.org
   kind: MBKojira
   role: /opt/ansible/roles/kojira
+
+- version: v1alpha1
+  group: apps.fedoraproject.org
+  kind: MBMbsBackend
+  role: /opt/ansible/roles/mbs-backend
