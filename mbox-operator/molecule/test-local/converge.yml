@@ -21,3 +21,4 @@
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-hub.yml'
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-builder.yml'
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_kojira.yml'
+- import_playbook: '{{ playbook_dir }}/../default/converge/converge_mbs-backend.yml'

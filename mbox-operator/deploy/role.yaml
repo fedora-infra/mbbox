@@ -79,6 +79,7 @@ rules:
   - mbkojihubs
   - mbkojibuilders
   - mbkojiras
+  - mbmbsbackends
   verbs:
   - create
   - delete
