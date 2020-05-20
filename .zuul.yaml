@@ -5,7 +5,7 @@
 - job:
     name: test-local
     run: ci/test-local.yml
-    nodeset: fedora-30-vm
+    nodeset: fedora-30-vm-medium
 - job:
     name: test-docs
     run: ci/test-docs.yml
@@ -13,11 +13,12 @@
 - job:
     name: test-lint
     run: ci/test-default.yml
-    nodeset: fedora-30-vm
+    nodeset: fedora-30-container
 - project:
     check:
       jobs:
         - test-cluster
+        - test-local
         - test-docs
         - test-lint
 

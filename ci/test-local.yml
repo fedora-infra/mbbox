@@ -2,14 +2,21 @@
    tasks:
     - name: List project directory on the test system
       command: ls -al {{ansible_user_dir}}/{{zuul.project.src_dir}}
-    - name: Install git, pip and podman
+    - name: Install git, pip and moby
       become: true
       package:
-        name: ['git', 'podman', 'python3-pip']
+        name: ['git', 'moby-engine', 'python3-pip']
         state: present
+    - name: Start docker
+      become: true
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: docker
     - name: Install libraries through pip 
       become: true
       pip:
         name: ['molecule', 'kubernetes', 'openshift', 'docker', 'jmespath', 'yamllint']
-    - name: Run molecule 
+    - name: Run molecule
+      become: true
       command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-local
