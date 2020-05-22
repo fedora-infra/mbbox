@@ -50,14 +50,16 @@
                 - "'ReadWriteOnce' in kojibuilder_pvcs.resources[0].spec.accessModes"
                 - "kojibuilder_pvcs.resources[0].spec.resources.requests.storage == '10Gi'"
 
-#      - block:
-#        - name: 'TEST: kojibuilder.pod deployment'
-#          k8s_info:
-#            api_version: v1
-#            kind: Pod
-#            namespace: "{{ namespace }}"
-#          register: pods
-#        - assert:
-#            that:
-#              - pods.resources|length == 1
-#              - pods.resources[0].metadata.labels['app'] == 'koji-builder'
+      - block:
+          - name: 'TEST: kojibuilder.pod deployment'
+            k8s_info:
+              api_version: v1
+              kind: Pod
+              namespace: "{{ namespace }}"
+              label_selectors:
+                - app = koji-builder
+            register: pods
+          - assert:
+              that:
+                - pods.resources|length == 1
+                - pods.resources[0].metadata.labels['app'] == 'koji-builder'

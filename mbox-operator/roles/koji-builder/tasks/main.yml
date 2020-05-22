@@ -25,16 +25,44 @@
         pvc_size: "{{ koji_builder_pvc_size }}"
         pvc_namespace: "{{ meta.namespace }}"
 
-# - block:
-#     - name: Apply koji-builder deployment
-#       template:
-#         src: deployment.yml.j2
-#         dest: /tmp/deployment.yml
-#     - k8s:
-#         state: present
-#         src: /tmp/deployment.yml
-#         wait: true
-#         namespace: "{{ meta.namespace }}"
-#     - file:
-#         path: /tmp/deployment.yml
-#         state: absent
+- block:
+    - name: add default koji host
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_builder_admin_secret }}"
+      register: k8s_res
+    - fail:
+        msg: "Secret not found: {{ koji_builder_admin_secret }}"
+      when: k8s_res.resources|length == 0
+    - set_fact:
+        koji_admin_secret: "{{ k8s_res.resources[0] | from_yaml }}"
+    - copy:
+        content: "{{ koji_admin_secret.data['client.pem'] | b64decode }}"
+        dest: "{{ koji_dir.path }}/admin.pem"
+    - koji_host:
+        server: "{{ koji_builder_koji_hub_url }}/kojihub"
+        host: "{{ koji_builder_host_name }}"
+        arch: "{{ koji_builder_host_arch }}"
+        ssl_auth:
+          cert: "{{ koji_dir.path }}/admin.pem"
+          serverca: "{{ koji_dir.path }}/ca.pem"
+          verify: "{{ koji_builder_ssl_verify }}"
+    - file:
+        state: absent
+        path: "{{ koji_dir.path }}"
+
+- block:
+    - name: Apply koji-builder deployment
+      template:
+        src: deployment.yml.j2
+        dest: /tmp/deployment.yml
+    - k8s:
+        state: present
+        src: /tmp/deployment.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+    - file:
+        path: /tmp/deployment.yml
+        state: absent

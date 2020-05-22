@@ -14,4 +14,6 @@ spec:
   koji_hub_url: 'https://koji-hub:8443'
   max_jobs: 5
   vendor: MBox
-
+  host_arch: x86
+  host_name: koji-hub:8443
+  ssl_verify: false
