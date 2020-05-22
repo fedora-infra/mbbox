@@ -18,6 +18,13 @@ spec:
       - name: koji-builder
         image: {{ koji_builder_image }}
         resources: {}
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - kojid
+          initialDelaySeconds: 5
+          periodSeconds: 15
         volumeMounts:
         - name: config-volume
           mountPath: /etc/kojid
