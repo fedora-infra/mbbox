@@ -3,8 +3,11 @@ NS = default
 
 .PHONY: prepare/crds
 prepare/crds:
-	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojihubs_crd.yaml
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojibuilders_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbmbsbackends_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojihubs_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbmbsfrontends_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mbkojiras_crd.yaml
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_mboxes_crd.yaml
 
 .PHONY: prepare/rbac

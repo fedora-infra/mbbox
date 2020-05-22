@@ -5,6 +5,13 @@
     suffix: cert
   register: cert_dir
 
+- name: create temporary koji directory
+  tempfile:
+    state: directory
+    prefix: kojibuilder
+    suffix: koji
+  register: koji_dir
+
 - name: Retrieve ca secret
   block:
     - k8s_info:
@@ -24,6 +31,9 @@
     - copy:
         content: "{{ ca.data.key | b64decode }}"
         dest: "{{ cert_dir.path }}/ca_key.pem"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ koji_dir.path }}/ca.pem"
 
 - name: Client certificate creation
   block:
@@ -33,7 +43,7 @@
     - openssl_csr:
         path: "{{ cert_dir.path }}/client_req.pem"
         privatekey_path: "{{ cert_dir.path }}/client_key.pem"
-        common_name: "{{ koji_builder_hub_user }}"
+        common_name: "{{ koji_builder_host_name }}"
     - openssl_certificate:
         path: "{{ cert_dir.path }}/client_cert.pem"
         csr_path: "{{ cert_dir.path }}/client_req.pem"

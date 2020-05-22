@@ -14,3 +14,9 @@ koji_builder_pvc_size: "{{ mnt_pvc_size|default('10Gi') }}"
 koji_builder_koji_hub_url: "{{ koji_hub_url|default('https://koji-hub:8443') }}"
 koji_builder_maxjobs: "{{ max_jobs|default(5) }}"
 koji_builder_vendor: "{{ vendor|default('MBox') }}"
+
+koji_builder_admin_secret: "{{ admin_secret | default('koji-hub-admin-cert') }}"
+
+koji_builder_host_arch: "{{ host_arch | default('x86') }}"
+koji_builder_host_name: "{{ host_name | default('koji-hub:8443') }}"
+koji_builder_ssl_verify: "{{ ssl_verify | default(true) }}"

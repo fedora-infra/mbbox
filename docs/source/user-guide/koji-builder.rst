@@ -44,6 +44,12 @@ Parameters
 +----------------------+------------------------------------+---------+
 | vendor               | MBox                               | string  |
 +----------------------+------------------------------------+---------+
+| host_arch            | x86                                | string  |
++----------------------+------------------------------------+---------+
+| host_name            | koji-hub:8443                      | string  |
++----------------------+------------------------------------+---------+
+| ssl_verify           | true                               | boolean |
++----------------------+------------------------------------+---------+
 
 image
 -----
@@ -132,6 +138,28 @@ vendor
 ------
 
 Koji-builder vendor used in rpm headers.
+
+host_arch
+---------
+
+The koji builder host architecture.
+
+host_name
+---------
+
+The koji host name to be used when creating a koji host in koji-hub.
+
+The name should be a qualified hostname address.
+
+This name should be unique in koji and is also used as the koji-build client
+certificate CN field.
+
+ssl_verify
+----------
+
+A boolean flag used to tell koji-builder to verify ssl certs when connectiong to koji-hub.
+
+It should be set to false if using self-signed certs.
 
 Usage
 =====
