@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kojira
+  labels:
+    app: kojira
+spec:
+  replicas: {{ kojira_replicas|int }}
+  selector:
+    matchLabels:
+      app: kojira
+  template:
+    metadata:
+      labels:
+        app: kojira
+    spec:
+      containers:
+      - name: kojira
+        image: "{{ kojira_image }}"
+        resources: {}
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - kojira
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/kojira
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: client-cert-volume
+          mountPath: /etc/clientcert
+          readOnly: true
+        - name: koji-shared
+          mountPath: /mnt/koji
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "{{ kojira_configmap }}"
+      - name: cacert-volume
+        secret:
+          secretName: "{{ kojira_cacert_secret }}"
+      - name: client-cert-volume
+        secret:
+          secretName: "{{ kojira_client_cert_secret }}"
+      - name: koji-shared
+        persistentVolumeClaim:
+          claimName: "{{ kojira_shared_pvc }}"

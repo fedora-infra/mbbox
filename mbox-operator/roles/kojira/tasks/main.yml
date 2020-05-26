@@ -6,6 +6,8 @@
     suffix: deploy
   register: kojira_dir
 
+- include_tasks: cert.yml
+
 - block:
     - name: ensure kojira configmap
       template:
@@ -17,9 +19,18 @@
         namespace: "{{ meta.namespace }}"
         src: "{{ kojira_dir.path }}/kojira.configmap.yaml"
 
+- block:
+    - name: ensure kojira deployment
+      template:
+        src: kojira.deployment.yaml.j2
+        dest: "{{ kojira_dir.path }}/kojira.deployment.yaml"
+    - k8s:
+        state: present
+        wait: true
+        namespace: "{{ meta.namespace }}"
+        src: "{{ kojira_dir.path }}/kojira.deployment.yaml"
+
 - name: cleanup
   file:
     path: "{{ kojira_dir.path }}"
     state: absent
-
-- include_tasks: cert.yml
