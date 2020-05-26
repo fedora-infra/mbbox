@@ -1,0 +1,78 @@
+- name: create temporary cert directory
+  tempfile:
+    state: directory
+    prefix: kojira
+    suffix: cert
+  register: cert_dir
+
+- name: create temporary koji directory
+  tempfile:
+    state: directory
+    prefix: kojira
+    suffix: koji
+  register: koji_dir
+
+- name: Retrieve ca secret
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ kojira_cacert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: k8s_secrets
+    - fail:
+        msg: "Secret {{ kojira_cacert_secret }} not found."
+      when: k8s_secrets.resources|length == 0
+    - set_fact:
+        ca: "{{ k8s_secrets.resources[0] }}"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ cert_dir.path }}/ca_cert.pem"
+    - copy:
+        content: "{{ ca.data.key | b64decode }}"
+        dest: "{{ cert_dir.path }}/ca_key.pem"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ koji_dir.path }}/ca.pem"
+
+- name: Client certificate creation
+  block:
+    - openssl_privatekey:
+        path: "{{ cert_dir.path }}/client_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ cert_dir.path }}/client_req.pem"
+        privatekey_path: "{{ cert_dir.path }}/client_key.pem"
+        common_name: "{{ kojira_hub_username }}"
+    - openssl_certificate:
+        path: "{{ cert_dir.path }}/client_cert.pem"
+        csr_path: "{{ cert_dir.path }}/client_req.pem"
+        ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
+        provider: ownca
+
+- name: Kubernetes client certificate secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ kojira_client_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: clientcert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ kojira_client_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: kojira
+          data:
+            client.pem: "{{ (lookup('file', cert_dir.path + '/client_key.pem') + '\n' + lookup('file', cert_dir.path + '/client_cert.pem')) | b64encode }}"
+      when: clientcert_query.resources|length == 0
+
+- name: cleanup
+  file:
+    path: "{{ cert_dir.path }}"
+    state: absent

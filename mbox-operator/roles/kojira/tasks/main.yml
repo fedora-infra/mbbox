@@ -21,3 +21,5 @@
   file:
     path: "{{ kojira_dir.path }}"
     state: absent
+
+- include_tasks: cert.yml

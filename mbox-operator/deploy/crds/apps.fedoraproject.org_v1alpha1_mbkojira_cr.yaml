@@ -10,3 +10,5 @@ spec:
   src: 'no'
   max_repo_tasks: 15
   repo_tasks_limit: 15
+  cacert_secret: koji-hub-ca-cert
+  client_cert_secret: kojira-client-cert

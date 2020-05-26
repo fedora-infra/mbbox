@@ -18,3 +18,17 @@
               - kojira_configmap.resources|length == 1
               - kojira_configmap.resources[0].metadata.labels['app'] == 'kojira'
               - "'kojira.conf' in kojira_configmap.resources[0].data"
+
+        - block:
+          - name: 'TEST: kojira.secret.client-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: kojira-client-cert 
+            register: kojira_client_secrets
+          - assert:
+              that:
+                - kojira_client_secrets.resources|length == 1
+                - kojira_client_secrets.resources[0].metadata.labels['app'] == 'kojira'
+                - "'client.pem' in kojira_client_secrets.resources[0].data"
