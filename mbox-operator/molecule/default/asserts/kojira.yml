@@ -6,5 +6,15 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   tasks:
       - block:
-        - name: 'TEST: placeholder'
-          meta: noop
+        - name: 'TEST: kojira.configmap'
+          k8s_info:
+            api_version: v1
+            kind: ConfigMap
+            namespace: "{{ namespace }}"
+            name: kojira-config 
+          register: kojira_configmap
+        - assert:
+            that:
+              - kojira_configmap.resources|length == 1
+              - kojira_configmap.resources[0].metadata.labels['app'] == 'kojira'
+              - "'kojira.conf' in kojira_configmap.resources[0].data"

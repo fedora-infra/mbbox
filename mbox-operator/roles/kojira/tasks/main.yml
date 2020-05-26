@@ -1,1 +1,23 @@
 ---
+- name: create temporary kojira directory
+  tempfile:
+    state: directory
+    prefix: kojira
+    suffix: deploy
+  register: kojira_dir
+
+- block:
+    - name: ensure kojira configmap
+      template:
+        src: kojira.configmap.yaml.j2
+        dest: "{{ kojira_dir.path }}/kojira.configmap.yaml"
+    - k8s:
+        state: present
+        wait: true
+        namespace: "{{ meta.namespace }}"
+        src: "{{ kojira_dir.path }}/kojira.configmap.yaml"
+
+- name: cleanup
+  file:
+    path: "{{ kojira_dir.path }}"
+    state: absent

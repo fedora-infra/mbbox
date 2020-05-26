@@ -1,2 +1,7 @@
 ---
-# defaults file for kojira
+kojira_configmap: kojira-config
+kojira_hub_username: "{{ hub_username | default('kojira') }}"
+kojira_hub_host: "{{ hub_host | default('koji-hub:8443') }}"
+kojira_src: "{{ src | default('no') }}"
+kojira_max_repo_tasks: "{{ max_repo_tasks | default(15) }}"
+kojira_repo_tasks_limit: "{{ repo_tasks_limit | default(15) }}"

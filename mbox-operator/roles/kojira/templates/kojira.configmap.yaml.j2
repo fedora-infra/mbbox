@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kojira_configmap }}
+  labels:
+    app: kojira
+data:
+  kojira.conf: |-
+    [kojira]
+    ; Configuration authentication
+    serverca = /etc/cacert/cert
+    user={{ kojira_hub_username }}
+    cert=/etc/clientcert/{{ kojira_hub_username }}.pem
+
+    server=https://{{ kojira_hub_host }}/kojihub
+    with_src={{ kojira_src }}
+    max_repo_tasks={{ kojira_max_repo_tasks }}
+    repo_tasks_limit={{ kojira_repo_tasks_limit }}
+    logfile=/dev/stdout
