@@ -1,6 +1,8 @@
 ---
 # defaults file for kojira
-kojira_configmap: kojira-config
+kojira_replicas: "{{ replicas | default(1) }}"
+kojira_image: "{{ image | default('quay.io/fedora/kojira:latest') }}"
+kojira_configmap: "{{ configmap | default('kojira-config') }}"
 kojira_hub_username: "{{ hub_username | default('kojira') }}"
 kojira_hub_host: "{{ hub_host | default('koji-hub:8443') }}"
 kojira_src: "{{ src | default('no') }}"
@@ -9,3 +11,5 @@ kojira_repo_tasks_limit: "{{ repo_tasks_limit | default(15) }}"
 
 kojira_cacert_secret: "{{ cacert_secret|default('kojira-ca-cert') }}"
 kojira_client_cert_secret: "{{ client_cert_secret|default('kojira-client-cert') }}"
+
+kojira_shared_pvc: "{{ shared_pvc | default('koji-hub-mnt-pvc') }}"

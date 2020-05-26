@@ -5,6 +5,9 @@ metadata:
   labels:
     app: mb-kojira
 spec:
+  replicas: 1
+  image: quay.io/fedora/kojira:latest
+  configmap: kojira-config
   hub_username: kojira
   hub_host: koji-hub:8443
   src: 'no'
@@ -12,3 +15,4 @@ spec:
   repo_tasks_limit: 15
   cacert_secret: koji-hub-ca-cert
   client_cert_secret: kojira-client-cert
+  shared_pvc: koji-hub-mnt-pvc
