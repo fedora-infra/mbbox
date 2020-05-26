@@ -13,7 +13,7 @@
 - job:
     name: test-lint
     run: ci/test-default.yml
-    nodeset: fedora-30-container
+    nodeset: fedora-30-vm
 - project:
     check:
       jobs:
