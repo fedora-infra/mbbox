@@ -5,5 +5,8 @@ metadata:
   labels:
     app: mb-kojira
 spec:
-  # Add fields here
-  size: 3
+  hub_username: kojira
+  hub_host: koji-hub:8443
+  src: 'no'
+  max_repo_tasks: 15
+  repo_tasks_limit: 15
