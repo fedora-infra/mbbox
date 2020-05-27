@@ -8,3 +8,4 @@ User Guide
 
    koji-hub
    koji-builder
+   kojira
