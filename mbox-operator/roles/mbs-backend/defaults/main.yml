@@ -1,2 +1,5 @@
 ---
 # defaults file for mbs-backend
+mbs_hub_username: "{{ hub_username | default('mbs') }}"
+mbs_cacert_secret: "{{ cacert_secret|default('mbs-ca-cert') }}"
+mbs_client_cert_secret: "{{ client_cert_secret|default('mbs-client-cert') }}"

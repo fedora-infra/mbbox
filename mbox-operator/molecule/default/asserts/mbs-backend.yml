@@ -6,5 +6,15 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   tasks:
       - block:
-        - name: 'TEST: placeholder'
-          meta: noop
+          - name: 'TEST: mbs-backend.secret.client-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: mbs-client-cert 
+            register: mbs_client_secrets
+          - assert:
+              that:
+                - mbs_client_secrets.resources|length == 1
+                - mbs_client_secrets.resources[0].metadata.labels['app'] == 'mbs-backend'
+                - "'client.pem' in mbs_client_secrets.resources[0].data"
