@@ -1,1 +1,14 @@
 ---
+- name: create temporary component directory
+  tempfile:
+    state: directory
+    prefix: mbs
+    suffix: backend
+  register: mbs_dir
+
+- include_tasks: cert.yml
+
+- name: delete temporary component directory
+  file:
+    path: "{{ mbs_dir.path }}"
+    state: absent

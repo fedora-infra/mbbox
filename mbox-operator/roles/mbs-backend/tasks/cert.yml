@@ -1,0 +1,69 @@
+- name: ensure cert dir exists
+  file:
+    path: "{{ mbs_dir.path }}/certs"
+    state: directory
+
+- name: retrieve ca secret
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ mbs_cacert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: k8s_secrets
+    - fail:
+        msg: "Secret {{ mbs_cacert_secret }} not found."
+      when: k8s_secrets.resources|length == 0
+    - set_fact:
+        ca: "{{ k8s_secrets.resources[0] }}"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ mbs_dir.path }}/certs/ca_cert.pem"
+    - copy:
+        content: "{{ ca.data.key | b64decode }}"
+        dest: "{{ mbs_dir.path }}/certs/ca_key.pem"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ mbs_dir.path }}/certs/ca.pem"
+
+- name: client certificate creation
+  block:
+    - openssl_privatekey:
+        path: "{{ mbs_dir.path }}/certs/client_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ mbs_dir.path }}/certs/client_req.pem"
+        privatekey_path: "{{ mbs_dir.path }}/certs/client_key.pem"
+        common_name: "{{ mbs_hub_username }}"
+    - openssl_certificate:
+        path: "{{ mbs_dir.path }}/certs/client_cert.pem"
+        csr_path: "{{ mbs_dir.path }}/certs/client_req.pem"
+        ownca_path: "{{ mbs_dir.path }}/certs/ca_cert.pem"
+        ownca_privatekey_path: "{{ mbs_dir.path }}/certs/ca_key.pem"
+        provider: ownca
+
+- name: kubernetes client certificate secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ mbs_client_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: clientcert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ mbs_client_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: mbs-backend
+          data:
+            client.pem: "{{ (lookup('file', mbs_dir.path + '/certs/client_key.pem') + '\n' + lookup('file', mbs_dir.path + '/certs/client_cert.pem')) | b64encode }}"
+      when: clientcert_query.resources|length == 0
+
+- name: cert dir cleanup
+  file:
+    path: "{{ mbs_dir.path }}/certs"
+    state: absent
