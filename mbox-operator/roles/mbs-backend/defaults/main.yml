@@ -1,11 +1,13 @@
 ---
 # defaults file for mbs-backend
+mbs_backend_replicas: "{{ replicas | default(1) }}"
+mbs_backend_image: "{{ image | default('quay.io/fedora/mbs-backend:latest') }}"
 mbs_backend_configmap: "{{ configmap | default('mbs-backend-configmap') }}"
 mbs_backend_config_fedora_versions: "{{ fedora_versions | default(['32']) }}"
 mbs_backend_hub: "{{ hub_url | default('https://koji-hub:8443') }}"
-mbs_hub_username: "{{ hub_username | default('mbs') }}"
-mbs_cacert_secret: "{{ cacert_secret|default('mbs-ca-cert') }}"
-mbs_client_cert_secret: "{{ client_cert_secret|default('mbs-client-cert') }}"
+mbs_backend_hub_username: "{{ hub_username | default('mbs') }}"
+mbs_backend_cacert_secret: "{{ cacert_secret|default('mbs-ca-cert') }}"
+mbs_backend_client_cert_secret: "{{ client_cert_secret|default('mbs-client-cert') }}"
 mbs_backend_consumer: "{{ consumer | default(true) }}"
 mbs_backend_poller: "{{ poller | default(true) }}"
 mbs_backend_config_system: "{{ config_system | default('koji') }}"
@@ -17,3 +19,4 @@ mbs_backend_config_rpms_def_cache: "{{ config_rpms_def_cache | default('https://
 mbs_backend_config_modules_def_repo: "{{ config_modules_def_repo | default('git+https://src.fedoraproject.org/modules/') }}"
 mbs_backend_config_koji_repo_url: "{{ config_koji_repo_url | default('https://kojipkgs.stg.fedoraproject.org/repos') }}"
 mbs_backend_config_pdc_url: "{{ config_pdc_url | default('https://pdc.stg.fedoraproject.org/rest_api/v1') }}"
+mbs_backend_shared_pvc: "{{ shared_pvc | default('koji-hub-mnt-pvc') }}"

@@ -8,11 +8,11 @@
     - k8s_info:
         api_version: v1
         kind: Secret
-        name: "{{ mbs_cacert_secret }}"
+        name: "{{ mbs_backend_cacert_secret }}"
         namespace: "{{ meta.namespace }}"
       register: k8s_secrets
     - fail:
-        msg: "Secret {{ mbs_cacert_secret }} not found."
+        msg: "Secret {{ mbs_backend_cacert_secret }} not found."
       when: k8s_secrets.resources|length == 0
     - set_fact:
         ca: "{{ k8s_secrets.resources[0] }}"
@@ -34,7 +34,7 @@
     - openssl_csr:
         path: "{{ mbs_dir.path }}/certs/client_req.pem"
         privatekey_path: "{{ mbs_dir.path }}/certs/client_key.pem"
-        common_name: "{{ mbs_hub_username }}"
+        common_name: "{{ mbs_backend_hub_username }}"
     - openssl_certificate:
         path: "{{ mbs_dir.path }}/certs/client_cert.pem"
         csr_path: "{{ mbs_dir.path }}/certs/client_req.pem"
@@ -47,7 +47,7 @@
     - k8s_info:
         api_version: v1
         kind: Secret
-        name: "{{ mbs_client_cert_secret }}"
+        name: "{{ mbs_backend_client_cert_secret }}"
         namespace: "{{ meta.namespace }}"
       register: clientcert_query
     - k8s:
@@ -55,7 +55,7 @@
           apiVersion: v1
           kind: Secret
           metadata:
-            name: "{{ mbs_client_cert_secret }}"
+            name: "{{ mbs_backend_client_cert_secret }}"
             namespace: "{{ meta.namespace }}"
             labels:
               app: mbs-backend

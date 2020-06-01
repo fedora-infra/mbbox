@@ -43,6 +43,17 @@
 
 - include_tasks: cert.yml
 
+- block:
+    - name: ensure mbs-backend deployment
+      template:
+        src: deployment.yaml.j2
+        dest: "{{ mbs_dir.path }}/deployment.yaml"
+    - k8s:
+        src: "{{ mbs_dir.path }}/deployment.yaml"
+        state: present
+        namespace: "{{ meta.namespace }}"
+        wait: true
+
 - name: delete temporary component directory
   file:
     path: "{{ mbs_dir.path }}"

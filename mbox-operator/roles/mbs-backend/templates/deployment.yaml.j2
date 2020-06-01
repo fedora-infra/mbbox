@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mbs-backend
+  labels:
+    app: mbs-backend
+spec:
+  replicas: {{ mbs_backend_replicas|int }}
+  selector:
+    matchLabels:
+      app: mbs-backend
+  template:
+    metadata:
+      labels:
+        app: mbs-backend
+    spec:
+      containers:
+      - name: mbs-backend
+        image: "{{ mbs_backend_image }}"
+        resources: {}
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - fedmsg-hub-3
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/module-build-service
+          readOnly: true
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: client-cert-volume
+          mountPath: /etc/clientcert
+          readOnly: true
+        - name: koji-shared
+          mountPath: /mnt/koji
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "{{ mbs_backend_configmap }}"
+      - name: cacert-volume
+        secret:
+          secretName: "{{ mbs_backend_cacert_secret }}"
+      - name: client-cert-volume
+        secret:
+          secretName: "{{ mbs_backend_client_cert_secret }}"
+      - name: koji-shared
+        persistentVolumeClaim:
+          claimName: "{{ mbs_backend_shared_pvc }}"
