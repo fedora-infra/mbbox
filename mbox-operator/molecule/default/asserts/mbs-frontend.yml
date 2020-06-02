@@ -6,5 +6,30 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   tasks:
       - block:
-        - name: 'TEST: placeholder'
-          meta: noop
+        - name: 'TEST: mbs-frontend.configmap'
+          k8s_info:
+            api_version: v1
+            kind: ConfigMap
+            namespace: "{{ namespace }}"
+            name: mbs-frontend-configmap
+          register: mbs_configmap
+        - assert:
+            that:
+              - mbs_configmap.resources|length == 1
+              - mbs_configmap.resources[0].metadata.labels['app'] == 'mbs-frontend'
+              - "'httpd.conf' in mbs_configmap.resources[0].data"
+
+      - block:
+        - name: 'TEST: mbs-frontend.mbs-configmap'
+          k8s_info:
+            api_version: v1
+            kind: ConfigMap
+            namespace: "{{ namespace }}"
+            name: mbs-configmap
+          register: mbs_configmap
+        - assert:
+            that:
+              - mbs_configmap.resources|length == 1
+              - "'default_module_f32.yml' in mbs_configmap.resources[0].data"
+              - "'koji.conf' in mbs_configmap.resources[0].data"
+              - "'config.py' in mbs_configmap.resources[0].data"
