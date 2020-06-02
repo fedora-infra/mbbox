@@ -1,4 +1,39 @@
 ---
+- block:
+    - name: Retrieve postgresql secret
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ postgres_secret }}"
+      register: k8s_psql_secrets
+    - fail:
+        msg: "Secret {{ postgres_secret }} not found in namespace {{ meta.namespace }}"
+      when: k8s_psql_secrets.resources|length == 0
+    - set_fact:
+        psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
+
+- block:
+    - name: Ensure mbs_backend configmap 29 updated
+      template:
+        src: configmap.yml.j2
+        dest: /tmp/configmap.yml
+      vars:
+        mbs_backend_psql_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        mbs_backend_psql_db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
+        mbs_backend_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
+        mbs_backend_psql_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
+
+    - k8s:
+        state: present
+        src: /tmp/configmap.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+
+    - file:
+        path: /tmp/configmap.yml
+        state: absent
+
 - name: create temporary component directory
   tempfile:
     state: directory
