@@ -1,2 +1,20 @@
 ---
 # defaults file for mbs-frontend
+mbs_frontend_configmap: "{{ configmap|default('mbs-frontend-configmap') }}"
+mbs_frontend_host: "{{ host|default('mbs') }}"
+mbs_frontend_https_enabled: "{{ https_enabled|default(true) }}"
+mbs_frontend_http_port: "{{ http_port|default(8080) }}"
+mbs_frontend_https_port: "{{ https_port|default(8443) }}"
+
+mbs_configmap: "{{ mbs_configmap|default('mbs-configmap') }}"
+mbs_fedora_versions: "{{ fedora_versions|default(['32']) }}"
+mbs_hub_host: "{{ hub_host|default('https://koji-hub:8443') }}"
+mbs_messaging_system: "{{ messaging_sytem|default('fedmsg') }}"
+mbs_topic_prefix: "{{ topic_prefix|default('org.fedoraproject.dev') }}"
+mbs_scm_url: "{{ scm_url|default('git+https://src.fedoraproject.org/modules/') }}"
+mbs_rpms_default_repository: "{{ rpms_default_repository|default('git+https://src.fedoraproject.org/rpms/') }}"
+mbs_rpms_default_cache: "{{ rpms_default_cache|default('https://src.fedoraproject.org/repo/pkgs/') }}"
+mbs_modules_default_repository: "{{ modules_default_repository|default('git+https://src.fedoraproject.org/modules/') }}"
+mbs_postgres_secret: "{{ postgres_secret|default('postgres') }}"
+mbs_pdc_url: "{{ pdc_url|default('https://pdc.stg.fedoraproject.org/rest_api/v1') }}"
+mbs_oidc_required_scope: "{{ oidc_required_scope|default('https://mbs.fedoraproject.org/oidc/submit-build') }}"

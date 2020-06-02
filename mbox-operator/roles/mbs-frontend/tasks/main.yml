@@ -1,1 +1,48 @@
 ---
+- block:
+    - name: retrieve postgresql secret
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ postgres_secret }}"
+      register: k8s_psql_secrets
+    - fail:
+        msg: "Secret {{ postgres_secret }} not found in namespace {{ meta.namespace }}"
+      when: k8s_psql_secrets.resources|length == 0
+    - set_fact:
+        psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
+
+- name: create temporary mbs-frontend directory
+  tempfile:
+    state: directory
+    prefix: mbs-frontend
+    suffix: deploy
+  register: mbs_frontend_dir
+
+- block:
+    - name: ensure mbs-frontend configmap
+      template:
+        src: mbs-frontend.configmap.yaml.j2
+        dest: "{{ mbs_frontend_dir.path }}/mbs-frontend.configmap.yaml"
+    - k8s:
+        state: present
+        wait: true
+        namespace: "{{ meta.namespace }}"
+        src: "{{ mbs_frontend_dir.path }}/mbs-frontend.configmap.yaml"
+
+- block:
+    - name: ensure mbs configmap
+      template:
+        src: mbs-configmap.yaml.j2
+        dest: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
+      vars:
+        mbs_psql_hostname: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        mbs_psql_db_name: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
+        mbs_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
+        mbs_psql_pass: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
+    - k8s:
+        state: present
+        wait: true
+        namespace: "{{ meta.namespace }}"
+        src: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
