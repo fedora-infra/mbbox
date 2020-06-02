@@ -6,6 +6,18 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
   tasks:
       - block:
+          - name: 'TEST: mbs_backend.configmap'
+            k8s_info:
+              api_version: v1
+              kind: ConfigMap
+              namespace: "{{ namespace }}"
+              name: mbs-backend-configmap
+            register: mbs_backend_configmap
+          - assert:
+              that:
+                - mbs_backend_configmap.resources|length == 1
+                - mbs_backend_configmap.resources[0].metadata.labels['app'] == 'mbs-backend'
+                - "'default_module_f32.yml' in mbs_backend_configmap.resources[0].data"
           - name: 'TEST: mbs-backend.secret.client-cert'
             k8s_info:
               api_version: v1
