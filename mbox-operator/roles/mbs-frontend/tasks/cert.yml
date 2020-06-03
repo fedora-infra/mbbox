@@ -1,0 +1,113 @@
+- name: create temporary cert directory
+  tempfile:
+    state: directory
+    prefix: mbsfrontend
+    suffix: cert
+  register: cert_dir
+
+- name: retrieve ca secret
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ mbs_frontend_ca_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: k8s_secrets
+    - fail:
+        msg: "Secret {{ mbs_frontend_ca_cert_secret }} not found."
+      when: k8s_secrets.resources|length == 0
+    - set_fact:
+        ca: "{{ k8s_secrets.resources[0] }}"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ cert_dir.path }}/ca_cert.pem"
+    - copy:
+        content: "{{ ca.data.key | b64decode }}"
+        dest: "{{ cert_dir.path }}/ca_key.pem"
+    - copy:
+        content: "{{ ca.data.cert | b64decode }}"
+        dest: "{{ cert_dir.path }}/ca.pem"
+
+- name: client certificate creation
+  block:
+    - openssl_privatekey:
+        path: "{{ cert_dir.path }}/client_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ cert_dir.path }}/client_req.pem"
+        privatekey_path: "{{ cert_dir.path }}/client_key.pem"
+        common_name: "{{ mbs_frontend_koji_hub_host }}"
+    - openssl_certificate:
+        path: "{{ cert_dir.path }}/client_cert.pem"
+        csr_path: "{{ cert_dir.path }}/client_req.pem"
+        ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
+        provider: ownca
+
+- name: server certificate creation
+  block:
+    - openssl_privatekey:
+        path: "{{ cert_dir.path }}/server_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ cert_dir.path }}/server_req.pem"
+        privatekey_path: "{{ cert_dir.path }}/server_key.pem"
+        common_name: "{{ mbs_frontend_host }}"
+    - openssl_certificate:
+        path: "{{ cert_dir.path }}/server_cert.pem"
+        csr_path: "{{ cert_dir.path }}/server_req.pem"
+        ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
+        provider: ownca
+
+- name: kubernetes client certificate secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ mbs_frontend_client_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: clientcert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ mbs_frontend_client_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: mbs-frontend
+          data:
+            tls.crt: "{{ lookup('file', cert_dir.path + '/client_cert.pem') | b64encode }}"
+            tls.key: "{{ lookup('file', cert_dir.path + '/client_key.pem') | b64encode }}"
+            tls.pem: "{{ (lookup('file', cert_dir.path + '/client_key.pem') + '\n' + lookup('file', cert_dir.path + '/client_cert.pem')) | b64encode }}"
+          type: kubernetes.io/tls
+      when: clientcert_query.resources|length == 0
+
+- name: kubernetes server certificate secret creation
+  block:
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ mbs_frontend_service_cert_secret }}"
+        namespace: "{{ meta.namespace }}"
+      register: servicecert_query
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ mbs_frontend_service_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: mbs-frontend
+          data:
+            tls.crt: "{{ lookup('file', cert_dir.path + '/server_cert.pem') | b64encode }}"
+            tls.key: "{{ lookup('file', cert_dir.path + '/server_key.pem') | b64encode }}"
+          type: kubernetes.io/tls
+      when: servicecert_query.resources|length == 0
+
+- name: cleanup
+  file:
+    path: "{{ cert_dir.path }}"
+    state: absent

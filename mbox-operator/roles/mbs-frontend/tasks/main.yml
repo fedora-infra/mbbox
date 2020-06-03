@@ -46,3 +46,5 @@
         wait: true
         namespace: "{{ meta.namespace }}"
         src: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
+
+- include_tasks: cert.yml

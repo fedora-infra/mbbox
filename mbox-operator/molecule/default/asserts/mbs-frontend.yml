@@ -33,3 +33,34 @@
               - "'default_module_f32.yml' in mbs_configmap.resources[0].data"
               - "'koji.conf' in mbs_configmap.resources[0].data"
               - "'config.py' in mbs_configmap.resources[0].data"
+
+      - block:
+          - name: 'TEST: mbs-frontend.secret.client-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: mbs-frontend-client-cert 
+            register: mbsfrontend_client_secrets
+          - assert:
+              that:
+                - mbsfrontend_client_secrets.resources|length == 1
+                - mbsfrontend_client_secrets.resources[0].metadata.labels['app'] == 'mbs-frontend'
+                - "'tls.crt' in mbsfrontend_client_secrets.resources[0].data"
+                - "'tls.key' in mbsfrontend_client_secrets.resources[0].data"
+                - "'tls.pem' in mbsfrontend_client_secrets.resources[0].data"
+
+      - block:
+          - name: 'TEST: mbs-frontend.secret.mbs-frontend-service-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: mbs-frontend-service-cert
+            register: mbsfrontend_secrets
+          - assert:
+              that:
+                - mbsfrontend_secrets.resources|length == 1                
+                - mbsfrontend_secrets.resources[0].metadata.labels['app'] == 'mbs-frontend'
+                - "'tls.crt' in mbsfrontend_secrets.resources[0].data"
+                - "'tls.key' in mbsfrontend_secrets.resources[0].data"
