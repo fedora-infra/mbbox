@@ -1,7 +1,13 @@
 ---
 # defaults file for mbs-frontend
 mbs_frontend_configmap: "{{ configmap|default('mbs-frontend-configmap') }}"
-mbs_frontend_host: "{{ host|default('mbs') }}"
+
+mbs_frontend_ca_cert_secret: "{{ ca_cert_secret|default('koji-hub-ca-cert') }}"
+mbs_frontend_koji_hub_host: "{{ koji_hub_host|default('koji-hub:8443') }}"
+mbs_frontend_host: "{{ host|default('mbs.mbox.dev') }}"
+mbs_frontend_client_cert_secret: "{{ client_cert_secret|default('mbs-frontend-client-cert') }}"
+mbs_frontend_service_cert_secret: "{{ service_cert_secret|default('mbs-frontend-service-cert') }}"
+
 mbs_frontend_https_enabled: "{{ https_enabled|default(true) }}"
 mbs_frontend_http_port: "{{ http_port|default(8080) }}"
 mbs_frontend_https_port: "{{ https_port|default(8443) }}"
