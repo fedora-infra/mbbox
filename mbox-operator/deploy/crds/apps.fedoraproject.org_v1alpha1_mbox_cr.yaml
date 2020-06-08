@@ -3,4 +3,7 @@ kind: Mbox
 metadata:
   name: example-mbox
 spec:
-  size: 1
+  koji_pvc_name: mbox-koji-mnt
+  koji_pvc_size: 10Gi
+  root_ca_secret_name: mbox-koji-root-ca
+  koji_hub_host: koji-hub:8443

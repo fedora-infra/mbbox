@@ -1,31 +1,39 @@
 ---
-# tasks file for mbox
-- name: start memcached
-  k8s:
-    definition:
-      kind: Deployment
-      apiVersion: apps/v1
-      metadata:
-        name: '{{ meta.name }}-memcached'
-        namespace: '{{ meta.namespace }}'
-      spec:
-        replicas: "{{size}}"
-        selector:
-          matchLabels:
-            app: memcached
-        template:
+- name: create temporary mbox directory
+  tempfile:
+    state: directory
+    prefix: mbox
+    suffix: deploy
+  register: mbox_dir
+
+- include_tasks: cert.yml
+
+- block:
+    - name: mbox.pvc
+      k8s_info:
+        api_version: v1
+        kind: PersistentVolumeClaim
+        namespace: "{{ meta.namespace }}"
+        name: "{{ mbox_koji_pvc_name }}"
+      register: k8s_mbox_pvc_query
+    - k8s:
+        state: present
+        wait: true
+        definition:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
           metadata:
+            namespace: "{{ meta.namespace }}"
+            name: "{{ mbox_koji_pvc_name }}"
             labels:
-              app: memcached
+              app: mbox
           spec:
-            containers:
-              - name: memcached
-                command:
-                  - memcached
-                  - -m=64
-                  - -o
-                  - modern
-                  - -v
-                image: "docker.io/memcached:1.4.36-alpine"
-                ports:
-                  - containerPort: 11211
+            accessModes:
+              - ReadWriteMany
+            resources:
+              requests:
+                storage: "{{ mbox_koji_pvc_size }}"
+            selector:
+              matchLabels:
+                app: mbox
+      when: k8s_mbox_pvc_query.resources|length == 0

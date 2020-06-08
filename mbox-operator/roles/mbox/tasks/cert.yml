@@ -1,0 +1,79 @@
+- block:
+    - name: create temporary cert directory
+      set_fact:
+        mbox_cert_dir: "{{ mbox_dir.path }}/certs"
+    - file:
+        path: "{{ mbox_cert_dir }}"
+        state: directory
+
+- k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: "{{ meta.namespace }}"
+    name: "{{ mbox_root_ca_secret_name }}"
+  register: k8s_secrets
+
+- block:
+    - name: validate existing cert
+      set_fact:
+        k8s_mbox_secret: "{{ k8s_secrets.resources[0] | from_yaml }}"
+    - fail:
+        msg: "ca_req.pem key not found in {{ mbox_root_ca_secret_name }} secret"
+      when: "not 'ca_req.pem' in k8s_mbox_secret.data"
+    - fail:
+        msg: "ca_cert.pem key not found in {{ mbox_root_ca_secret_name }} secret"
+      when: "not 'ca_cert.pem' in k8s_mbox_secret.data"
+    - fail:
+        msg: "ca_key.pem key not found in {{ mbox_root_ca_secret_name }} secret"
+      when: "not 'ca_key.pem' in k8s_mbox_secret.data"
+  when: k8s_secrets.resources|length == 1
+
+- block:
+    - name: create self signed cert
+      openssl_privatekey:
+        path: "{{ mbox_cert_dir }}/ca_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ mbox_cert_dir }}/ca_req.pem"
+        privatekey_path: "{{ mbox_cert_dir }}/ca_key.pem"
+        common_name: "{{ mbox_koji_hub_host }}"
+        create_subject_key_identifier: true
+        key_usage:
+          - cRLSign
+          - dataEncipherment
+          - digitalSignature
+          - keyCertSign
+          - keyEncipherment
+          - nonRepudiation
+        basic_constraints:
+          - 'CA:TRUE'
+    - openssl_certificate:
+        path: "{{ mbox_cert_dir }}/ca_cert.pem"
+        privatekey_path: "{{ mbox_cert_dir }}/ca_key.pem"
+        csr_path: "{{ mbox_cert_dir }}/ca_req.pem"
+        provider: selfsigned
+    - set_fact:
+        ca_req: "{{ lookup('file', mbox_cert_dir + '/ca_req.pem') }}"
+        ca_cert: "{{ lookup('file', mbox_cert_dir + '/ca_cert.pem') }}"
+        ca_key: "{{ lookup('file', mbox_cert_dir + '/ca_key.pem') }}"
+    - k8s:
+        wait: true
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ mbox_root_ca_secret_name }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: mbox
+          data:
+            ca_req.pem: "{{ lookup('file', mbox_cert_dir + '/ca_req.pem') | b64encode }}"
+            ca_cert.pem: "{{ lookup('file', mbox_cert_dir + '/ca_cert.pem') | b64encode }}"
+            ca_key.pem: "{{ lookup('file', mbox_cert_dir + '/ca_key.pem') | b64encode }}"
+  when: k8s_secrets.resources|length == 0
+
+- name: delete temporary cert directory
+  file:
+    path: "{{ mbox_cert_dir }}"
+    state: absent
