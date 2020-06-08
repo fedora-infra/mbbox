@@ -18,6 +18,7 @@
       changed_when: not prev_hash.stdout or (prev_hash.stdout and prev_hash.stdout not in ''.join(build_cmd.stdout_lines[-2:]))
 
 
+- import_playbook: '{{ playbook_dir }}/../default/converge/converge_mbox.yml'
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-hub.yml'
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_koji-builder.yml'
 - import_playbook: '{{ playbook_dir }}/../default/converge/converge_kojira.yml'

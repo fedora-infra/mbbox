@@ -1,2 +1,6 @@
 ---
 # defaults file for mbox
+mbox_koji_pvc_name: "{{ koji_pvc_name | default('mbox-koji-mnt') }}"
+mbox_koji_pvc_size: "{{ koji_pvc_size | default('10Gi') }}"
+mbox_root_ca_secret_name: "{{ root_ca_secret_name | default('mbox-root-ca') }}"
+mbox_koji_hub_host: "{{ koji_hub_host | default('koji-hub:8443') }}"
