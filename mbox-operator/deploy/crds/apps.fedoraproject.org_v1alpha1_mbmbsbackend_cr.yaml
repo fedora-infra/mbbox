@@ -4,7 +4,7 @@ metadata:
   name: example-mb-mbs-backend
 spec:
   replicas: 1
-  mbs_image: quay.io/fedora/mbs-backend:latest
+  image: quay.io/fedora/mbs-backend:latest
   hub_username: mbs
   hub_url: "https://koji:8443"
   cacert_secret: koji-hub-ca-cert

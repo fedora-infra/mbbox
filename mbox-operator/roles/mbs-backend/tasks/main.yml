@@ -13,11 +13,19 @@
     - set_fact:
         psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
 
+
+- name: create temporary component directory
+  tempfile:
+    state: directory
+    prefix: mbs
+    suffix: backend
+  register: mbs_dir
+
 - block:
     - name: Ensure mbs_backend configmap 29 updated
       template:
         src: configmap.yml.j2
-        dest: /tmp/configmap.yml
+        dest: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
       vars:
         mbs_backend_psql_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
         mbs_backend_psql_db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
@@ -26,20 +34,13 @@
 
     - k8s:
         state: present
-        src: /tmp/configmap.yml
+        src: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
         wait: true
         namespace: "{{ meta.namespace }}"
 
     - file:
-        path: /tmp/configmap.yml
+        path: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
         state: absent
-
-- name: create temporary component directory
-  tempfile:
-    state: directory
-    prefix: mbs
-    suffix: backend
-  register: mbs_dir
 
 - include_tasks: cert.yml
 

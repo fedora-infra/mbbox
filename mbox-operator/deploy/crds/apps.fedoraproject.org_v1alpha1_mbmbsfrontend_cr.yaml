@@ -5,6 +5,8 @@ metadata:
   labels:
     app: mb-mbs-frontend
 spec:
+  replicas: 1
+  image: quay.io/fedora/mbs-frontend:latest
   configmap: mbs-frontend-configmap
   https_enabled: true
   mbs_configmap: mbs-configmap

@@ -50,6 +50,22 @@
 - include_tasks: cert.yml
 
 - block:
+    - name: ensure mbs-frontend deployment
+      template:
+        src: deployment.yaml.j2
+        dest: "{{ mbs_frontend_dir.path }}/deployment.yaml"
+    - k8s:
+        src: "{{ mbs_frontend_dir.path }}/deployment.yaml"
+        state: present
+        namespace: "{{ meta.namespace }}"
+        wait: true
+
+- name: delete temporary component directory
+  file:
+    path: "{{ mbs_frontend_dir.path }}"
+    state: absent
+
+- block:
     - name: apply mbs-frontend http service and ingress
       template:
         src: service.yml.j2

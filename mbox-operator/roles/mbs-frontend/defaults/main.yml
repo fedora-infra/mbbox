@@ -1,5 +1,8 @@
 ---
 # defaults file for mbs-frontend
+mbs_frontend_replicas: "{{ replicas | default(1) }}"
+mbs_frontend_image: "{{ image | default('quay.io/fedora/mbs-frontend:latest') }}"
+
 mbs_frontend_configmap: "{{ configmap|default('mbs-frontend-configmap') }}"
 
 mbs_frontend_ca_cert_secret: "{{ ca_cert_secret|default('koji-hub-ca-cert') }}"

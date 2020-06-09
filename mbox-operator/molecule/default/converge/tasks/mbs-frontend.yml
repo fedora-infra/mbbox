@@ -46,6 +46,12 @@
       delay: 10
       retries: 30
   rescue:
+    - name: debug name
+      ignore_errors: true
+      failed_when: false
+      debug:
+        var: custom_resource.metadata.name
+
     - name: debug cr
       ignore_errors: true
       failed_when: false
