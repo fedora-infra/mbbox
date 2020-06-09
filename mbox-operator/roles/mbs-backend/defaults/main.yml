@@ -20,3 +20,4 @@ mbs_backend_config_modules_def_repo: "{{ config_modules_def_repo | default('git+
 mbs_backend_config_koji_repo_url: "{{ config_koji_repo_url | default('https://kojipkgs.stg.fedoraproject.org/repos') }}"
 mbs_backend_config_pdc_url: "{{ config_pdc_url | default('https://pdc.stg.fedoraproject.org/rest_api/v1') }}"
 mbs_backend_shared_pvc: "{{ shared_pvc | default('koji-hub-mnt-pvc') }}"
+mbs_backend_mbox: "{{ mbox | default('') }}"

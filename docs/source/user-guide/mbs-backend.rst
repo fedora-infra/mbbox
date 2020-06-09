@@ -64,6 +64,8 @@ Parameters
 +-------------------------+-----------------------------------------------+---------+
 | fedora_versions         | ['32']                                        |[string] |
 +-------------------------+-----------------------------------------------+---------+
+| mbox                    | ""                                            | string  |
++-------------------------+-----------------------------------------------+---------+
 
 
 image
@@ -197,7 +199,17 @@ Configures the URL for the Product Definition Centre
 fedora_versions
 --------------
 
-The versions for the Fedora 32 
+The versions for the Fedora 32
+
+mbox
+----
+
+A Mbox resource name to retrieve shared data from (pvc volume and shared certs).
+
+MBS Backend will use the following vars if this property is missing:
+
+* shared_pvc (shared koji mnt volume)
+* cacert_secret (root ca secret)
 
 Usage
 =====

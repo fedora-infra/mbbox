@@ -19,3 +19,4 @@ spec:
   fedora_messaging_url: amqps://koji:something@rabbitmq
   messaging_cert_cm: koji-hub-msg
   ingress_backend: nginx
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

@@ -50,21 +50,34 @@
 
 - include_tasks: cert.yml
 
-- name: PVC creation
-  include_tasks: pvc.yml
-  vars:
-    pvc_name: "{{ item['pvc_name'] }}"
-    pvc_size: "{{ item['pvc_size'] }}"
-    pvc_namespace: "{{ meta.namespace }}"
-  with_items:
-    - {
-      "pvc_name": "{{ koji_hub_httpd_pvc_name }}",
-      "pvc_size": "{{ koji_hub_httpd_pvc_size }}"
-    }
-    - {
-      "pvc_name": "{{ koji_hub_mnt_pvc_name }}",
-      "pvc_size": "{{ koji_hub_mnt_pvc_size }}"
-    }
+- block:
+    - name: PVC creation
+      include_tasks: pvc.yml
+      vars:
+        pvc_name: "{{ koji_hub_httpd_pvc_name }}"
+        pvc_size: "{{ koji_hub_httpd_pvc_size }}"
+        pvc_namespace: "{{ meta.namespace }}"
+    - include_tasks: pvc.yml
+      vars:
+        pvc_name: "{{ koji_hub_mnt_pvc_name }}"
+        pvc_size: "{{ koji_hub_mnt_pvc_size }}"
+        pvc_namespace: "{{ meta.namespace }}"
+      when: koji_mbox|length == 0
+
+- block:
+    - name: retrieve and set shared pvc name
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ koji_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+    - set_fact:
+        koji_hub_mnt_pvc_name: "{{ k8s_mboxes.resources[0].spec.koji_pvc_name }}"
+  when: koji_mbox|length > 0
 
 - block:
     - name: Apply koji-hub http service and ingress

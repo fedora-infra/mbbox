@@ -23,3 +23,5 @@ spec:
   config_modules_def_repo: 'git+https://src.fedoraproject.org/modules/'
   config_koji_repo_url: 'https://kojipkgs.stg.fedoraproject.org/repos'
   config_pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
+

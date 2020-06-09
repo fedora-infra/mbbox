@@ -17,3 +17,4 @@ spec:
   host_arch: x86
   host_name: koji-hub:8443
   ssl_verify: false
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
