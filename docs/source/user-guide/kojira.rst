@@ -46,6 +46,8 @@ Parameters
 +----------------------+------------------------------------+---------+
 | client_cert_secret   | koji-builder-client-cert           | string  |
 +----------------------+------------------------------------+---------+
+| mbox                 | ""                                 | string  |
++----------------------+------------------------------------+---------+
 
 
 image
@@ -133,6 +135,15 @@ Secret format:
     tls.pem: -|
       This is a combination of tls.key and tls.crt separated by '\n' and encoded in base64
       Example: "{{ (lookup('file', 'client_key.pem') + '\n' + lookup('file', 'client_cert.pem')) | b64encode }}"
+
+mbox
+----
+
+A Mbox resource name to retrieve shared data from such as shared pvc name.
+
+Koji-builder will use the following var if this property is missing:
+
+* shared_pvc (shared koji mnt volume)
 
 Usage
 =====

@@ -44,6 +44,21 @@
 - include_tasks: cert.yml
 
 - block:
+    - name: retrieve and set shared pvc name var
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ mbs_backend_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ mbs_backend_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+    - set_fact:
+        mbs_backend_shared_pvc: "{{ k8s_mboxes.resources[0].spec.koji_pvc_name }}"
+  when: mbs_backend_mbox|length > 0
+
+- block:
     - name: ensure mbs-backend deployment
       template:
         src: deployment.yaml.j2

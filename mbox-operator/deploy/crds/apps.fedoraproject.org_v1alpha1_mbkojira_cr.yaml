@@ -16,3 +16,4 @@ spec:
   cacert_secret: koji-hub-ca-cert
   client_cert_secret: kojira-client-cert
   shared_pvc: koji-hub-mnt-pvc
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

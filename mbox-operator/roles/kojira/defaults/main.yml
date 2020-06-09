@@ -13,3 +13,5 @@ kojira_cacert_secret: "{{ cacert_secret|default('kojira-ca-cert') }}"
 kojira_client_cert_secret: "{{ client_cert_secret|default('kojira-client-cert') }}"
 
 kojira_shared_pvc: "{{ shared_pvc | default('koji-hub-mnt-pvc') }}"
+
+kojira_builder_mbox: "{{ mbox | default('') }}"

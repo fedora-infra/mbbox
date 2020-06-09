@@ -51,10 +51,13 @@ Parameters
 +----------------------+--------------------------------+---------+
 | fedora_messaging_url |                                | string  |
 +----------------------+--------------------------------+---------+
-| messaging_cert_cm    | koji-hub-nsg                   | string  |
+| messaging_cert_cm    | koji-hub-msg                   | string  |
 +----------------------+--------------------------------+---------+
 | ingress_backend      | nginx                          | string  |
 +----------------------+--------------------------------+---------+
+| mbox                 | ""                             | string  |
++----------------------+--------------------------------+---------+
+
 
 image
 -----
@@ -218,6 +221,16 @@ The kubernetes ingress backend to use when creating an ingress resource for koji
 Available choices:
 
 * nginx
+
+mbox
+----
+
+A Mbox resource name to retrieve shared data from (pvc volume and shared certs).
+
+Koji-builder will use the following vars if this property is missing to create/use those shared resources:
+
+* mnt_pvc_name (shared koji mnt volume)
+* ca_cert_secret (root ca secret)
 
 Usage
 =====

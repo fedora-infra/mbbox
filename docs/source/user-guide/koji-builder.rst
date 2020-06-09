@@ -50,6 +50,9 @@ Parameters
 +----------------------+------------------------------------+---------+
 | ssl_verify           | true                               | boolean |
 +----------------------+------------------------------------+---------+
+| mbox                 | ""                                 | string |
++----------------------+------------------------------------+---------+
+
 
 image
 -----
@@ -161,6 +164,16 @@ A boolean flag used to tell koji-builder to verify ssl certs when connectiong to
 
 It should be set to false if using self-signed certs.
 
+mbox
+----
+
+A Mbox resource name to retrieve shared data from (pvc volume and shared certs).
+
+Koji-builder will use the following vars if this property is missing:
+
+* mnt_pvc_name (shared koji mnt volume)
+* cacert_secret (root ca secret)
+
 Usage
 =====
 
@@ -188,6 +201,7 @@ Create a file containing the following content (modify as needed):
     koji_hub_url: 'https://koji-hub:8443'
     max_jobs: 5
     vendor: MBox
+    mbox: 
 
 Run the following command to create a koji-builder resource:
   

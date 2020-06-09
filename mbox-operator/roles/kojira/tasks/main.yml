@@ -20,6 +20,21 @@
         src: "{{ kojira_dir.path }}/kojira.configmap.yaml"
 
 - block:
+    - name: retrieve and set shared pvc name var
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ kojira_builder_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ kojira_builder_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+    - set_fact:
+        kojira_shared_pvc: "{{ k8s_mboxes.resources[0].spec.koji_pvc_name }}"
+  when: kojira_builder_mbox|length > 0
+
+- block:
     - name: ensure kojira deployment
       template:
         src: kojira.deployment.yaml.j2
