@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mbs-frontend
+  labels:
+    app: mbs-frontend
+spec:
+  replicas: {{ mbs_frontend_replicas|int }}
+  selector:
+    matchLabels:
+      app: mbs-frontend
+  template:
+    metadata:
+      labels:
+        app: mbs-frontend
+    spec:
+      containers:
+      - name: mbs-frontend
+        image: "{{ mbs_frontend_image }}"
+        ports:
+        - containerPort: 8443
+        resources: {}
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - httpd
+        readinessProbe:
+          tcpSocket:
+              port: 8443
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/module-build-service
+          readOnly: true
+        - name: frontend-config-volume
+          mountPath: /etc/mbs-frontend
+          readOnly: true
+        - name: mbs-frontend-httpd
+          mountPath: /httpdir
+        - name: cacert-volume
+          mountPath: /etc/cacert
+          readOnly: true
+        - name: service-cert-volume
+          mountPath: /etc/servicecert
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "{{ mbs_configmap }}"
+      - name: frontend-config-volume
+        configMap:
+          name: "{{ mbs_frontend_configmap }}"
+      - name: mbs-frontend-httpd
+        emptyDir: {}
+      - name: cacert-volume
+        secret:
+          secretName: "{{ mbs_frontend_client_cert_secret }}"
+      - name: service-cert-volume
+        secret:
+          secretName: "{{ mbs_frontend_service_cert_secret }}"

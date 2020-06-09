@@ -62,8 +62,7 @@ data:
     </VirtualHost>
 {% endif %}
 
-    WSGIDaemonProcess mbs_frontend display-name=mbs_frontend processes=2 threads=2 maximum-requests=1000 home=/tmp/httpdir
-    WSGIProcessGroup mbs_frontend
+    WSGIDaemonProcess mbs_frontend display-name=mbs_frontend processes=2 threads=2 maximum-requests=1000 home=/httpdir
     WSGIApplicationGroup %{GLOBAL}
     WSGISocketPrefix run/wsgi
     WSGIRestrictStdout Off
@@ -80,4 +79,4 @@ data:
 
     SSLCertificateFile /etc/servicecert/tls.crt
     SSLCertificateKeyFile /etc/servicecert/tls.key
-    SSLCertificateChainFile /etc/cacert/cert
+    SSLCertificateChainFile /etc/cacert/tls.crt
