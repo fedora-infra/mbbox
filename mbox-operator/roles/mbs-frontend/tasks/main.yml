@@ -48,3 +48,24 @@
         src: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
 
 - include_tasks: cert.yml
+
+- block:
+    - name: apply mbs-frontend http service and ingress
+      template:
+        src: service.yml.j2
+        dest: /tmp/service.yml
+    - k8s:
+        state: present
+        src: /tmp/service.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+    - template:
+        src: ingress.yml.j2
+        dest: /tmp/ingress.yml
+      vars:
+        mbs_frontend_ingress_name: mbs-frontend-http
+    - k8s:
+        state: present
+        src: /tmp/ingress.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"

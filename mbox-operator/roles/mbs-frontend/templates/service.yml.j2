@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ mbs_frontend_svc_name }}
+  labels:
+    app: mbs-frontend
+    service: {{ mbs_frontend_svc_name }}
+spec:
+  selector:
+    app: mbs-frontend
+  ports:
+{% if mbs_frontend_https_enabled %}
+    - name: https
+      port: {{ mbs_frontend_https_port }}
+      targetPort: {{ mbs_frontend_https_port }}
+{% else %}
+    - name: http
+      port: {{ mbs_frontend_http_port }}
+      targetPort: {{ mbs_frontend_http_port }}
+{% endif %}

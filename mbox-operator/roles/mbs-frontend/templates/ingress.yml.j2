@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ mbs_frontend_ingress_name }}
+  labels:
+    app: mbs-frontend
+{% if mbs_frontend_ingress_backend == 'nginx' %}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+{% endif %}
+spec:
+{% if mbs_frontend_https_enabled %}
+  tls:
+  - hosts:
+    - {{ mbs_frontend_host }}
+    secretName: {{ mbs_frontend_service_cert_secret }}
+{% endif %}
+  rules:
+    - http:
+        paths:
+          - path: /mbs
+            pathType: Prefix
+            backend:
+              serviceName: {{ mbs_frontend_svc_name }}
+              servicePort: {{ mbs_frontend_http_port }}
