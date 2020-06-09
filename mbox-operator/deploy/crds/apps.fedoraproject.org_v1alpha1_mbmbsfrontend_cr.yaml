@@ -8,7 +8,7 @@ spec:
   configmap: mbs-frontend-configmap
   https_enabled: true
   mbs_configmap: mbs-configmap
-  fedora-versions: ['32']
+  fedora_versions: ['32']
   hub_host: 'https://koji-hub:8443'
   messaging_system: 'fedmsg'
   topic_prefix: 'org.fedoraproject.dev'
@@ -25,3 +25,5 @@ spec:
   host: 'mbs.mbox.dev'
   client_cert_secret: mbs-frontend-client-cert 
   service_cert_secret: mbs-frontend-service-cert
+  service_name: 'mbs'
+  ingress_backend: 'nginx'

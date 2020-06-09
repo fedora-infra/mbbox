@@ -12,6 +12,9 @@ mbs_frontend_https_enabled: "{{ https_enabled|default(true) }}"
 mbs_frontend_http_port: "{{ http_port|default(8080) }}"
 mbs_frontend_https_port: "{{ https_port|default(8443) }}"
 
+mbs_frontend_svc_name: "{{ service_name|default('mbs') }}"
+mbs_frontend_ingress_backend: "{{ ingress_backend|default('nginx') }}"
+
 mbs_configmap: "{{ mbs_configmap|default('mbs-configmap') }}"
 mbs_fedora_versions: "{{ fedora_versions|default(['32']) }}"
 mbs_hub_host: "{{ hub_host|default('https://koji-hub:8443') }}"
