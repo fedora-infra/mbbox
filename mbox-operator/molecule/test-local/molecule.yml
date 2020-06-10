@@ -34,6 +34,8 @@ provisioner:
     KUBECONFIG: /tmp/molecule/kind-test-local/kubeconfig
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
     KIND_PORT: '${TEST_CLUSTER_PORT:-10443}'
+  playbooks:
+    destroy: destroy.yml
 scenario:
   name: test-local
   test_sequence:
