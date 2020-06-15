@@ -1,5 +1,22 @@
 ---
 - block:
+    - name: retrieve mbox resource
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ mbs_frontend_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ mbs_frontend_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+  when: mbs_frontend_mbox|length > 0
+
+- set_fact:
+    postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
+  when: mbs_frontend_mbox|length > 0
+
+- block:
     - name: retrieve postgresql secret
       k8s_info:
         api_version: v1

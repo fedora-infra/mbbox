@@ -5,6 +5,11 @@
     suffix: cert
   register: cert_dir
 
+- block:
+    - set_fact:
+        mbs_frontend_ca_cert_secret: "{{ k8s_mboxes.resources[0].spec.root_ca_secret_name }}"
+  when: mbs_frontend_mbox|length > 0
+
 - name: retrieve ca secret
   block:
     - k8s_info:

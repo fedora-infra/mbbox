@@ -9,6 +9,18 @@
 - include_tasks: cert.yml
 
 - block:
+    - name: check if postgresql secret exists
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ mbox_psql_secret_name }}"
+      register: k8s_psql_secrets
+    - fail:
+        msg: "Secret {{ mbox_psql_secret_name }} not found in namespace {{ meta.namespace }}"
+      when: k8s_psql_secrets.resources|length == 0
+
+- block:
     - name: mbox.pvc
       k8s_info:
         api_version: v1

@@ -1,5 +1,14 @@
 ---
 - block:
+    - name: Delete postgres resources
+      k8s:
+        state: absent
+        namespace: "{{ namespace }}"
+        definition: "{{ lookup('file', deploy_dir + '/../../components/psql/' + item) }}"
+        wait: true
+      with_items:
+        - 0-secret.yaml
+
     - name: Delete the Operator Deployment
       k8s:
         state: absent
@@ -20,6 +29,14 @@
       delay: 3
       retries: 10
       when: delete_deployment.changed
+
+    - name: Create postgres resources
+      k8s:
+        definition: "{{ lookup('file', deploy_dir + '/../../components/psql/' + item) }}"
+        namespace: "{{ namespace }}"
+        wait: true
+      with_items:
+        - 0-secret.yaml
 
     - name: Create the Operator Deployment
       k8s:

@@ -5,8 +5,20 @@
     suffix: cert
   register: cert_dir
 
+- block:
+    - set_fact:
+        koji_hub_ca_cert_secret: "{{ k8s_mboxes.resources[0].spec.root_ca_secret_name }}"
+  when: koji_mbox|length > 0
+
+# koji-hub ca cert
 - name: Root CA creation
-  block:
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ koji_hub_ca_cert_secret }}"
+    namespace: "{{ meta.namespace }}"
+  register: k8s_cacert_query
+- block:
     - openssl_privatekey:
         path: "{{ cert_dir.path }}/ca_key.pem"
         size: 4096
@@ -29,10 +41,33 @@
         privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
         csr_path: "{{ cert_dir.path }}/ca_req.pem"
         provider: selfsigned
+    - k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ koji_hub_ca_cert_secret }}"
+            namespace: "{{ meta.namespace }}"
+            labels:
+              app: koji-hub
+          data:
+            csr: "{{ lookup('file', cert_dir.path + '/ca_req.pem') | b64encode }}"
+            cert: "{{ lookup('file', cert_dir.path + '/ca_cert.pem') | b64encode }}"
+            key: "{{ lookup('file', cert_dir.path + '/ca_key.pem') | b64encode }}"
+      when: k8s_cacert_query.resources|length == 0
+  when: koji_mbox|length == 0
 
-- name: Server certificate creation
-  block:
-    - openssl_privatekey:
+# koji-hub httpd cert
+- name: check if server cert exists
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ koji_hub_service_cert_secret }}"
+    namespace: "{{ meta.namespace }}"
+  register: k8s_servicecert_query
+- block:
+    - name: Server certificate creation
+      openssl_privatekey:
         path: "{{ cert_dir.path }}/server_key.pem"
         size: 4096
     - openssl_csr:
@@ -45,55 +80,6 @@
         ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
         ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
         provider: ownca
-
-- name: Admin user certificate creation
-  block:
-    - openssl_privatekey:
-        path: "{{ cert_dir.path }}/admin_key.pem"
-        size: 4096
-    - openssl_csr:
-        path: "{{ cert_dir.path }}/admin_req.pem"
-        privatekey_path: "{{ cert_dir.path }}/admin_key.pem"
-        common_name: "{{ koji_hub_admin_username }}"
-    - openssl_certificate:
-        path: "{{ cert_dir.path }}/admin_cert.pem"
-        csr_path: "{{ cert_dir.path }}/admin_req.pem"
-        ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
-        ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
-        provider: ownca
-
-- name: Kubernetes root ca secret creation
-  block:
-    - k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ koji_hub_ca_cert_secret }}"
-        namespace: "{{ meta.namespace }}"
-      register: cacert_query
-    - k8s:
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: "{{ koji_hub_ca_cert_secret }}"
-            namespace: "{{ meta.namespace }}"
-            labels:
-              app: koji-hub
-          data:
-            csr: "{{ lookup('file', cert_dir.path + '/server_req.pem') | b64encode }}"
-            cert: "{{ lookup('file', cert_dir.path + '/ca_cert.pem') | b64encode }}"
-            key: "{{ lookup('file', cert_dir.path + '/ca_key.pem') | b64encode }}"
-      when: cacert_query.resources|length == 0
-
-
-- name: Kubernetes server certificate secret creation
-  block:
-    - k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ koji_hub_service_cert_secret }}"
-        namespace: "{{ meta.namespace }}"
-      register: servicecert_query
     - k8s:
         definition:
           apiVersion: v1
@@ -107,16 +93,31 @@
             tls.crt: "{{ lookup('file', cert_dir.path + '/server_cert.pem') | b64encode }}"
             tls.key: "{{ lookup('file', cert_dir.path + '/server_key.pem') | b64encode }}"
           type: kubernetes.io/tls
-      when: servicecert_query.resources|length == 0
+  when: k8s_servicecert_query.resources|length == 0
 
-- name: Kubernetes admin certificate secret creation
-  block:
-    - k8s_info:
-        api_version: v1
-        kind: Secret
-        name: koji-hub-admin-cert
-        namespace: "{{ meta.namespace }}"
-      register: admin_cert_query
+# koji-hub admin client cert
+- name: check if admin client cert exists
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: koji-hub-admin-cert
+    namespace: "{{ meta.namespace }}"
+  register: k8s_admin_cert_query
+- block:
+    - name: Admin user certificate creation
+      openssl_privatekey:
+        path: "{{ cert_dir.path }}/admin_key.pem"
+        size: 4096
+    - openssl_csr:
+        path: "{{ cert_dir.path }}/admin_req.pem"
+        privatekey_path: "{{ cert_dir.path }}/admin_key.pem"
+        common_name: "{{ koji_hub_admin_username }}"
+    - openssl_certificate:
+        path: "{{ cert_dir.path }}/admin_cert.pem"
+        csr_path: "{{ cert_dir.path }}/admin_req.pem"
+        ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
+        provider: ownca
     - k8s:
         definition:
           apiVersion: v1
@@ -128,7 +129,7 @@
               app: koji-hub
           data:
             client.pem: "{{ (lookup('file', cert_dir.path + '/admin_key.pem') + '\n' + lookup('file', cert_dir.path + '/admin_cert.pem')) | b64encode }}"
-      when: admin_cert_query.resources|length == 0
+  when: k8s_admin_cert_query.resources|length == 0
 
 - name: cleanup
   file:
