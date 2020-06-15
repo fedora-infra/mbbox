@@ -12,6 +12,11 @@
     suffix: koji
   register: koji_dir
 
+- block:
+    - set_fact:
+        kojira_cacert_secret: "{{ k8s_mboxes.resources[0].spec.root_ca_secret_name }}"
+  when: kojira_builder_mbox|length > 0
+
 - name: Retrieve ca secret
   block:
     - k8s_info:

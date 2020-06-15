@@ -29,3 +29,4 @@ spec:
   service_cert_secret: mbs-frontend-service-cert
   service_name: 'mbs'
   ingress_backend: 'nginx'
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

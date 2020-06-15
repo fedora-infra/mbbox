@@ -1,5 +1,18 @@
 ---
 - block:
+    - name: retrieve mbox resource
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ koji_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+  when: koji_mbox|length > 0
+
+- block:
     - name: Retrieve postgresql secret
       k8s_info:
         api_version: v1
@@ -66,16 +79,7 @@
 
 - block:
     - name: retrieve and set shared pvc name
-      k8s_info:
-        api_version: apps.fedoraproject.org/v1alpha1
-        kind: Mbox
-        namespace: "{{ meta.namespace }}"
-        name: "{{ koji_mbox }}"
-      register: k8s_mboxes
-    - fail:
-        msg: "Failed to find mbox {{ koji_mbox }} in namespace {{ meta.namespace }}"
-      when: k8s_mboxes.resources|length == 0
-    - set_fact:
+      set_fact:
         koji_hub_mnt_pvc_name: "{{ k8s_mboxes.resources[0].spec.koji_pvc_name }}"
   when: koji_mbox|length > 0
 

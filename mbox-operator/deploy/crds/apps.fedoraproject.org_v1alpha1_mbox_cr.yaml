@@ -3,6 +3,7 @@ kind: Mbox
 metadata:
   name: example-mbox
 spec:
+  psql_secret_name: postgres
   koji_pvc_name: mbox-koji-mnt
   koji_pvc_size: 10Gi
   root_ca_secret_name: mbox-koji-root-ca

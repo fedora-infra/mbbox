@@ -30,3 +30,4 @@ mbs_modules_default_repository: "{{ modules_default_repository|default('git+http
 mbs_postgres_secret: "{{ postgres_secret|default('postgres') }}"
 mbs_pdc_url: "{{ pdc_url|default('https://pdc.stg.fedoraproject.org/rest_api/v1') }}"
 mbs_oidc_required_scope: "{{ oidc_required_scope|default('https://mbs.fedoraproject.org/oidc/submit-build') }}"
+mbs_frontend_mbox: "{{ mbox | default('') }}"

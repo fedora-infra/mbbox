@@ -1,19 +1,30 @@
 ---
 - block:
-  - name: Ensure koji-builder configmap is updated
-    template:
-      src: configmap.yml.j2
-      dest: /tmp/configmap.yml
+    - name: retrieve mbox resource
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_builder_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ koji_builder_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+  when: koji_builder_mbox|length > 0
 
-  - k8s:
-      state: present
-      src: /tmp/configmap.yml
-      wait: true
-      namespace: "{{ meta.namespace }}"
-
-  - file:
-      path: /tmp/configmap.yml
-      state: absent
+- block:
+    - name: Ensure koji-builder configmap is updated
+      template:
+        src: configmap.yml.j2
+        dest: /tmp/configmap.yml
+    - k8s:
+        state: present
+        src: /tmp/configmap.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+    - file:
+        path: /tmp/configmap.yml
+        state: absent
 
 - include_tasks: cert.yml
 

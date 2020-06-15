@@ -6,6 +6,19 @@
     suffix: deploy
   register: kojira_dir
 
+- block:
+    - name: retrieve mbox resource
+      k8s_info:
+        api_version: apps.fedoraproject.org/v1alpha1
+        kind: Mbox
+        namespace: "{{ meta.namespace }}"
+        name: "{{ kojira_builder_mbox }}"
+      register: k8s_mboxes
+    - fail:
+        msg: "Failed to find mbox {{ kojira_builder_mbox }} in namespace {{ meta.namespace }}"
+      when: k8s_mboxes.resources|length == 0
+  when: kojira_builder_mbox|length > 0
+
 - include_tasks: cert.yml
 
 - block:

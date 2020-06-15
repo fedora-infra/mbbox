@@ -3,6 +3,11 @@
     path: "{{ mbs_dir.path }}/certs"
     state: directory
 
+- block:
+    - set_fact:
+        mbs_backend_cacert_secret: "{{ k8s_mboxes.resources[0].spec.root_ca_secret_name }}"
+  when: mbs_backend_mbox|length > 0
+
 - name: retrieve ca secret
   block:
     - k8s_info:
