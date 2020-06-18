@@ -29,15 +29,6 @@
 - include_tasks: cert.yml
 
 - block:
-    - name: PVC creation
-      include_tasks: pvc.yml
-      vars:
-        pvc_name: "{{ koji_builder_pvc_name }}"
-        pvc_size: "{{ koji_builder_pvc_size }}"
-        pvc_namespace: "{{ meta.namespace }}"
-  when: koji_builder_mbox|length == 0
-
-- block:
     - name: retrieve and set shared pvc name var
       k8s_info:
         api_version: apps.fedoraproject.org/v1alpha1

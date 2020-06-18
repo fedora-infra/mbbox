@@ -34,10 +34,6 @@ Parameters
 +----------------------+------------------------------------+---------+
 | koji_hub_user        | 'koji-builder.mbox.dev'            | string  |
 +----------------------+------------------------------------+---------+
-| mnt_pvc_name         | koji-builder-mnt-pvc               | string  |
-+----------------------+------------------------------------+---------+
-| mnt_pvc_size         | 10Gi                               | string  |
-+----------------------+------------------------------------+---------+
 | koji_hub_url         | 'https://koji-hub:8443'            | string  |
 +----------------------+------------------------------------+---------+
 | max_jobs             | 5                                  | int     |
@@ -50,7 +46,9 @@ Parameters
 +----------------------+------------------------------------+---------+
 | ssl_verify           | true                               | boolean |
 +----------------------+------------------------------------+---------+
-| mbox                 | ""                                 | string |
+| shared_pvc           | koji-hub-mnt-pvc                   | string  |
++----------------------+------------------------------------+---------+
+| mbox                 | ""                                 | string  |
 +----------------------+------------------------------------+---------+
 
 
@@ -113,20 +111,6 @@ koji_hub_user
 
 User to use when authenticating with koji-hub.
 
-mnt_pvc_name
-------------
-
-Name of the PersistentVolumeClaim koji-builder will use.
-
-If provided PVC doesn't exists, it creates it's own.
-
-mnt_pvc_size
-------------
-
-Size of the PersistentVolumeClaim koji-builder will create.
-
-If mnt_pvc_name exists, this value is ignored.
-
 koji_hub_url
 ------------
 
@@ -163,6 +147,11 @@ ssl_verify
 A boolean flag used to tell koji-builder to verify ssl certs when connectiong to koji-hub.
 
 It should be set to false if using self-signed certs.
+
+shared_pvc
+----------
+
+Name of the shared PersistentVolumeClaim koji-builder will use.
 
 mbox
 ----

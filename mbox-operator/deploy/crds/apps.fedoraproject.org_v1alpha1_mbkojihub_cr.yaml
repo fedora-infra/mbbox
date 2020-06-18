@@ -19,4 +19,8 @@ spec:
   fedora_messaging_url: amqps://koji:something@rabbitmq
   messaging_cert_cm: koji-hub-msg
   ingress_backend: nginx
+  httpd_pvc_name: koji-hub-httpd-pvc
+  httpd_pvc_size: 1Gi
+  mnt_pvc_name: koji-hub-mnt-pvc
+  mnt_pvc_size: 10Gi
   # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
