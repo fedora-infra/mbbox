@@ -65,17 +65,32 @@
 
 - block:
     - name: PVC creation
-      include_tasks: pvc.yml
+      k8s_info:
+        api_version: v1
+        kind: PersistentVolumeClaim
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_hub_httpd_pvc_name }}"
+      register: k8s_httpd_pvc
+    - include_tasks: pvc.yml
       vars:
         pvc_name: "{{ koji_hub_httpd_pvc_name }}"
         pvc_size: "{{ koji_hub_httpd_pvc_size }}"
         pvc_namespace: "{{ meta.namespace }}"
+      when: k8s_httpd_pvc.resources|length == 0
+    - k8s_info:
+        api_version: v1
+        kind: PersistentVolumeClaim
+        namespace: "{{ meta.namespace }}"
+        name: "{{ koji_hub_mnt_pvc_name }}"
+      register: k8s_mnt_pvc
     - include_tasks: pvc.yml
       vars:
         pvc_name: "{{ koji_hub_mnt_pvc_name }}"
         pvc_size: "{{ koji_hub_mnt_pvc_size }}"
         pvc_namespace: "{{ meta.namespace }}"
-      when: koji_mbox|length == 0
+      when:
+        - koji_mbox|length == 0
+        - k8s_mnt_pvc.resources|length == 0
 
 - block:
     - name: retrieve and set shared pvc name
