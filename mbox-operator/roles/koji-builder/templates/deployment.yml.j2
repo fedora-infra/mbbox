@@ -49,4 +49,4 @@ spec:
           secretName: "{{ koji_builder_client_cert_secret }}"
       - name: koji-builder-mnt
         persistentVolumeClaim:
-          claimName: {{ koji_builder_pvc_name }}
+          claimName: "{{ koji_builder_shared_pvc }}"

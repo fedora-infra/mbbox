@@ -57,6 +57,14 @@ Parameters
 +----------------------+--------------------------------+---------+
 | mbox                 | ""                             | string  |
 +----------------------+--------------------------------+---------+
+| httpd_pvc_name       | koji-hub-httpd-pvc             | string  |
++----------------------+--------------------------------+---------+
+| httpd_pvc_size       | 1Gi                            | string  |
++----------------------+--------------------------------+---------+
+| mnt_pvc_name         | koji-hub-mnt-pvc               | string  |
++----------------------+--------------------------------+---------+
+| mnt_pvc_size         | 10Gi                            | string  |
++----------------------+--------------------------------+---------+
 
 
 image
@@ -221,6 +229,34 @@ The kubernetes ingress backend to use when creating an ingress resource for koji
 Available choices:
 
 * nginx
+
+httpd_pvc_name
+--------------
+
+Name of the PersistentVolumeClaim for httpd server koji-hub will use.
+
+If provided PVC doesn't exists, it creates its own.
+
+httpd_pvc_size
+--------------
+
+Size of the PersistentVolumeClaim for httpd server koji-hub will create.
+
+If httpd_pvc_name exists, this value is ignored.
+
+mnt_pvc_name
+------------
+
+Name of the PersistentVolumeClaim koji-hub will use.
+
+If provided PVC doesn't exists, it creates its own.
+
+mnt_pvc_size
+------------
+
+Size of the PersistentVolumeClaim koji-hub will create.
+
+If mnt_pvc_name exists, this value is ignored.
 
 mbox
 ----

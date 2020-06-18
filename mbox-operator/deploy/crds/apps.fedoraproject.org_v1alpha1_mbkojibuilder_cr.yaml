@@ -9,12 +9,11 @@ spec:
   cacert_secret: koji-hub-ca-cert
   client_cert_secret: koji-builder-client-cert
   koji_hub_user: 'koji-builder.mbox.dev'
-  mnt_pvc_name: koji-builder-mnt-pvc
-  mnt_pvc_size: 10Gi
   koji_hub_url: 'https://koji-hub:8443'
   max_jobs: 5
   vendor: MBox
   host_arch: x86
   host_name: koji-hub:8443
   ssl_verify: false
+  shared_pvc: koji-hub-mnt-pvc
   # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

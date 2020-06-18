@@ -23,9 +23,9 @@ prepare: prepare/crds prepare/rbac
 prepare/crs:
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
-	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_crd.yaml -n ${NS} || true
-	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_crd.yaml -n ${NS} || true
-	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_crd.yaml -n ${NS} || true
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml -n ${NS} || true
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_cr.yaml -n ${NS} || true
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_cr.yaml -n ${NS} || true
 
 .PHONY: deploy
 deploy: prepare
@@ -44,9 +44,9 @@ delete/crds:
 delete/crs:
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
-	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_crd.yaml -n ${NS} || true
-	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_crd.yaml -n ${NS} || true
-	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_crd.yaml -n ${NS} || true
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml -n ${NS} || true
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_cr.yaml -n ${NS} || true
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_cr.yaml -n ${NS} || true
 
 .PHONY: delete/rbac
 delete/rbac:
@@ -61,8 +61,8 @@ delete: delete/crds delete/rbac
 
 .PHONY: run
 run:
-	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml
-	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml
-	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_crd.yaml
-	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_crd.yaml
-	kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_crd.yaml
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_crd.yaml
