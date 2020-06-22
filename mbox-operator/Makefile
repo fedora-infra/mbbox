@@ -21,6 +21,7 @@ prepare: prepare/crds prepare/rbac
 
 .PHONY: prepare/crs
 prepare/crs:
+	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbox_cr.yaml -n ${NS} || true
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
 	@kubectl apply -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml -n ${NS} || true
@@ -42,6 +43,7 @@ delete/crds:
 
 .PHONY: delete/crs
 delete/crs:
+	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbox_cr.yaml -n ${NS} || true
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml -n ${NS} || true
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml -n ${NS} || true
 	@kubectl delete -f deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml -n ${NS} || true

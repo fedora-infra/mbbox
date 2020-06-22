@@ -11,6 +11,7 @@ mbox-operator
    :caption: Contents:
 
    user-guide/index
+   deployment-guide
    contributing
 
 
