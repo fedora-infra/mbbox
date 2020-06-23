@@ -63,7 +63,7 @@ Parameters
 +----------------------+--------------------------------+---------+
 | mnt_pvc_name         | koji-hub-mnt-pvc               | string  |
 +----------------------+--------------------------------+---------+
-| mnt_pvc_size         | 10Gi                            | string  |
+| mnt_pvc_size         | 10Gi                           | string  |
 +----------------------+--------------------------------+---------+
 
 
@@ -154,7 +154,7 @@ postgres_secret
 
 Postgresql secret used by koji-hub to connect to a psql instance.
 
-Depoyment will fail if this secret is not present.
+Deployment will fail if this secret is not present.
 
 Secret format:
 

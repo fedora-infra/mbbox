@@ -43,7 +43,7 @@ Prepare PostgreSQL DB
 
 In case you have PostgreSQL DB running in cluster you can skip this step and just use the existing one.
 
-To deploy PostgreSQL DB you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/psql>`_. You can change anything in those files, especially secret file. To deploy it run the following.
+To deploy PostgreSQL DB you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/psql>`__. You can change anything in those files, especially secret file. To deploy it run the following.
 
 .. code-block:: bash
 
@@ -54,7 +54,7 @@ Prepare RabbitMQ server
 
 In case you have a running RabbitMQ server in your cluster, you can skip this step and just use the existing one.
 
-To deploy RabbitMQ you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/rabbitmq>`_. You can change anything in those files, especially secret file. Refer to the `README.md` file for instructions about certificates. To deploy it run the following.
+To deploy RabbitMQ you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/rabbitmq>`__. You can change anything in those files, especially secret file. Refer to the `README.md` file for instructions about certificates. To deploy it run the following.
 
 .. code-block:: bash
 

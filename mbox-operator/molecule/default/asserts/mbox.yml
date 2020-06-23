@@ -20,3 +20,14 @@
                 - "'ca_req.pem' in k8s_secrets.resources[0].data"
                 - "'ca_cert.pem' in k8s_secrets.resources[0].data"
                 - "'ca_key.pem' in k8s_secrets.resources[0].data"
+      - block:
+          - name: mbox.secret.root_ca
+            k8s_info:
+              api_version: v1
+              kind: ConfigMap
+              namespace: "{{ namespace }}"
+              name: mbs-configmap
+            register: k8s_cms
+          - assert:
+              that: 
+                - k8s_cms.resources|length == 1

@@ -138,7 +138,7 @@ postgres_secret
 
 Postgresql secret used by mbs-frontend to connect to a psql instance.
 
-Depoyment will fail if this secret is not present.
+Deployment will fail if this secret is not present.
 
 Secret format:
 
@@ -249,32 +249,32 @@ Create a file mbmbsfrontend-cr.yaml containing the following content (modify as 
 
 .. code-block:: yaml
 
-apiVersion: apps.fedoraproject.org/v1alpha1
-kind: MBMbsFrontend
-metadata:
-  name: mb-mbs-frontend
-  labels:
-    app: mb-mbs-frontend
-spec:
-  configmap: mbs-frontend-configmap
-  https_enabled: true
-  mbs_configmap: mbs-configmap
-  fedora-versions: ['32']
-  hub_host: 'https://koji-hub:8443'
-  messaging_system: 'fedmsg'
-  topic_prefix: 'org.fedoraproject.dev'
-  scm_url: 'git+https://src.fedoraproject.org/modules/'
-  rpms_default_repository: 'git+https://src.fedoraproject.org/rpms/' 
-  rpms_default_cache: 'https://src.fedoraproject.org/repo/pkgs/'
-  modules_default_repository: 'git+https://src.fedoraproject.org/modules/'
-  postgres_secret: postgres
-  pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
-  oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
-  ca_cert_secret: koji-hub-ca-cert
-  koji_hub_host: 'koji-hub:8443'
-  host: 'mbs.mbox.dev'
-  client_cert_secret: mbs-frontend-client-cert 
-  service_cert_secret: mbs-frontend-service-cert
+  apiVersion: apps.fedoraproject.org/v1alpha1
+  kind: MBMbsFrontend
+  metadata:
+    name: mb-mbs-frontend
+    labels:
+      app: mb-mbs-frontend
+  spec:
+    configmap: mbs-frontend-configmap
+    https_enabled: true
+    mbs_configmap: mbs-configmap
+    fedora-versions: ['32']
+    hub_host: 'https://koji-hub:8443'
+    messaging_system: 'fedmsg'
+    topic_prefix: 'org.fedoraproject.dev'
+    scm_url: 'git+https://src.fedoraproject.org/modules/'
+    rpms_default_repository: 'git+https://src.fedoraproject.org/rpms/' 
+    rpms_default_cache: 'https://src.fedoraproject.org/repo/pkgs/'
+    modules_default_repository: 'git+https://src.fedoraproject.org/modules/'
+    postgres_secret: postgres
+    pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+    oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
+    ca_cert_secret: koji-hub-ca-cert
+    koji_hub_host: 'koji-hub:8443'
+    host: 'mbs.mbox.dev'
+    client_cert_secret: mbs-frontend-client-cert 
+    service_cert_secret: mbs-frontend-service-cert
 
 Run the following command to create a mbs-frontend resource:
   
