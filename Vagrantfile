@@ -35,35 +35,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
  # Comment this line if you would like to disable the automatic update during provisioning
  config.vm.provision "shell", inline: "sudo dnf upgrade -y"
 
- # Create the "mbbox" OpenShift 3.11 box
- config.vm.define "mbbox_os311", primary: true do |mbbox_os311|
-    mbbox_os311.vm.host_name = "mbbox-os311.example.com"
-    # bootstrap and run with ansible
-    mbbox_os311.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ci/mbbox-os311-playbook.yml"
-      ansible.raw_arguments = ["-e", "ansible_python_interpreter=/usr/bin/python3"]
-    end
-
-    mbbox_os311.vm.provider :libvirt do |domain|
-        # Season to taste
-        domain.cpus = Etc.nprocessors
-        domain.cpu_mode = "host-passthrough"
-        domain.graphics_type = "spice"
-        domain.memory = 4096
-        domain.video_type = "qxl"
-
-        # Uncomment the following line if you would like to enable libvirt's unsafe cache
-        # mode. It is called unsafe for a reason, as it causes the virtual host to ignore all
-        # fsync() calls from the guest. Only do this if you are comfortable with the possibility of
-        # your development guest becoming corrupted (in which case you should only need to do a
-        # vagrant destroy and vagrant up to get a new one).
-        #
-        # domain.volume_cache = "unsafe"
-    end
- end
- 
  # Create the "mbbox" OperatorSDK box
- config.vm.define "mbbox_osdk", autostart: false do |mbbox_osdk|
+ config.vm.define "mbbox_osdk", autostart: true do |mbbox_osdk|
     mbbox_osdk.vm.host_name = "mbbox-osdk.example.com"
     # bootstrap and run with ansible
     mbbox_osdk.vm.provision "ansible" do |ansible|
