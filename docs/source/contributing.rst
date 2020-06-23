@@ -81,10 +81,10 @@ To start the vagrant operator SDK box, run the following in project root:
 
 .. code-block:: bash
 
-   vagrant up mbbox_osdk #starts the vagrant VM, it could take a while
-   vagrant ssh mbbox_osdk #connects you to the vagrant VM
+   vagrant up #starts the vagrant VM, it could take a while
+   vagrant ssh #connects you to the vagrant VM
 
 In vagrant VM you can find project folder in `~/devel`.
 To run the tests do `cd ~/devel/mbox-operator` and follow `E2E Tests`_ section.
 
-If you encounter any issue with `vagrant up mbbox_osdk` command, do `vagrant destroy mbbox_osdk` to be sure that there isn't any leftover from previous run.
+If you encounter any issue with `vagrant up` command, do `vagrant destroy` to be sure that there isn't any leftover from previous run.
