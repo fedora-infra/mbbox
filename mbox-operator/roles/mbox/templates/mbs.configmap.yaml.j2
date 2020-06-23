@@ -1,0 +1,197 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ mbs_configmap }}
+data:
+{% for fedora_version in mbs_fedora_versions %}
+  default_module_f{{ fedora_version }}.yml: |-
+    data:
+      description: Fedora {{ fedora_version }} traditional base
+      license:
+        module: [MIT]
+      name: platform
+      profiles:
+        buildroot:
+          rpms: [bash, bzip2, coreutils, cpio, diffutils, fedora-release, findutils, gawk,
+            grep, gzip, info, make, patch, redhat-rpm-config, rpm-build, sed, shadow-utils,
+            tar, unzip, util-linux, which, xz]
+        srpm-buildroot:
+          rpms: [bash, fedora-release, fedpkg-minimal, gnupg2, redhat-rpm-config, rpm-build,
+            shadow-utils]
+      stream: f{{ fedora_version }}
+      summary: Fedora {{ fedora_version }} traditional base
+      context: 00000000
+      version: 5
+      xmd:
+        mbs:
+          buildrequires: {}
+          commit: f{{ fedora_version }}
+          requires: {}
+          koji_tag: module-f{{ fedora_version }}-build
+          mse: TRUE
+    document: modulemd
+    version: 1
+{% endfor %}
+
+  koji.conf: |-
+    [koji]
+    server = https://{{ mbs_hub_host }}/kojihub
+    weburl = https://{{ mbs_hub_host }}/koji
+    topurl = https://{{ mbs_hub_host }}/kojifiles
+    authtype = ssl
+    ca = /etc/cacert/cert
+    serverca = /etc/cacert/cert
+    cert = /etc/clientcert/client.pem
+
+  mock.cfg: |-
+    # Nonsense, but what do we do...
+
+  yum.conf: |-
+    # Nonsense, but what do we do...
+
+  config.py: |-
+    from os import path
+
+    # FIXME: workaround for this moment till confdir, dbdir (installdir etc.) are
+    # declared properly somewhere/somehow
+    confdir = path.abspath(path.dirname(__file__))
+    # use parent dir as dbdir else fallback to current dir
+    dbdir = path.abspath(path.join(confdir, '..')) if confdir.endswith('conf') \
+            else confdir
+
+    class ProdConfiguration(object):
+        NO_AUTH = True  # This is a test setup, let's try noauth for now
+
+        SECRET_KEY = '84d9e9f9cd40e66fc6c4c2e9987dce48df3ce98542529fd0'
+        SQLALCHEMY_TRACK_MODIFICATIONS = True
+        # Where we should run when running "manage.py runssl" directly.
+        HOST = '0.0.0.0'
+        PORT = 5000
+
+        # Global network-related values, in seconds
+        NET_TIMEOUT = 120
+        NET_RETRY_INTERVAL = 30
+
+        SYSTEM = 'koji'
+        MESSAGING = '{{ mbs_messaging_system }}'  # or amq
+        MESSAGING_TOPIC_PREFIX = ['{{ mbs_topic_prefix }}']
+        KOJI_CONFIG = '/etc/module-build-service/koji.conf'
+        KOJI_PROFILE = 'koji'
+        ARCHES = ['x86_64']
+        KOJI_PROXYUSER = False
+        KOJI_REPOSITORY_URL = 'https://{{ mbs_hub_host }}/pkgs/repos'
+        #PDC_URL = 'http://modularity.fedorainfracloud.org:8080/rest_api/v1'
+        PDC_INSECURE = True
+        PDC_DEVELOP = True
+        SCMURLS = ["{{ mbs_scm_url }}"]
+
+        # How often should we resort to polling, in seconds
+        # Set to zero to disable polling
+        POLLING_INTERVAL = 600
+
+        # Determines how many builds that can be submitted to the builder
+        # and be in the build state at a time. Set this to 0 for no restrictions
+        # New name
+        NUM_CONCURRENT_BUILDS = 5
+        # Old name https://pagure.io/fm-orchestrator/issue/574
+        NUM_CONSECUTIVE_BUILDS = 5
+
+        RPMS_DEFAULT_REPOSITORY = '{{ mbs_rpms_default_repository }}'
+        RPMS_ALLOW_REPOSITORY = False
+        RPMS_DEFAULT_CACHE = '{{ mbs_rpms_default_cache }}'
+        RPMS_ALLOW_CACHE = False
+
+        MODULES_DEFAULT_REPOSITORY = '{{ mbs_modules_default_repository }}'
+        MODULES_ALLOW_REPOSITORY = False
+
+        # Available backends are: console, file, journal.
+        LOG_BACKEND = 'console'
+
+        # Path to log file when LOG_BACKEND is set to "file".
+        LOG_FILE = 'module_build_service.log'
+
+        # Available log levels are: debug, info, warn, error.
+        LOG_LEVEL = 'debug'
+
+        # Settings for Kerberos
+        KRB_KEYTAB = None
+        KRB_PRINCIPAL = None
+        KRB_CCACHE = None
+
+        DEBUG = False  # Don't turn this on.
+
+        # These groups are allowed to submit builds.
+        ALLOWED_GROUPS = [
+            # https://pagure.io/fesco/issue/1763
+            'packager',
+        ]
+
+        # These groups are allowed to cancel the builds of other users.
+        ADMIN_GROUPS = [
+            # Test env, only packager group exists
+            'packager',
+            'factory2',
+            'releng',
+        ]
+
+        REBUILD_STRATEGY = 'only-changed'
+        REBUILD_STRATEGY_ALLOW_OVERRIDE = True
+
+        SQLALCHEMY_DATABASE_URI = 'postgresql://{{ mbs_psql_user }}:{{ mbs_psql_pass }}@{{ mbs_psql_hostname }}/{{ mbs_psql_db_name }}'
+
+        # https://pagure.io/fm-orchestrator/issue/334
+        KOJI_PROXYUSER = False
+
+        # Our per-build logs for the koji-content generator go here.
+        # CG imports are controlled by KOJI_ENABLE_CONTENT_GENERATOR
+        BUILD_LOGS_DIR = '/var/tmp'
+
+        # Yes, use tls.
+        PDC_INSECURE = False
+        # No, don't try to obtain a token (we just read.  we don't write.)
+        PDC_DEVELOP = True
+
+        KOJI_REPOSITORY_URL = 'https://kojipkgs.stg.fedoraproject.org/repos'
+        PDC_URL = '{{ mbs_pdc_url }}'
+
+        RESOLVER = "db"
+
+        # Made possible by https://pagure.io/releng/issue/6799
+        KOJI_ENABLE_CONTENT_GENERATOR = True
+
+        # See https://pagure.io/releng/issue/7012
+        BASE_MODULE_NAMES = set(['platform', 'bootstrap'])
+        KOJI_CG_BUILD_TAG_TEMPLATE = "{}-modular-updates-candidate"
+        KOJI_CG_DEFAULT_BUILD_TAG = "modular-updates-candidate"
+
+        # This is a whitelist of prefixes of koji tags we're allowed to manipulate
+        KOJI_TAG_PREFIXES = [
+            # This is our standard prefix.  All module tags should start with this.
+            'module',
+        ]
+
+        # If this is too long, we could change it to 'fm_' some day.
+        DEFAULT_DIST_TAG_PREFIX = 'module_'
+
+        # Delete module-* targets one hour after build
+        KOJI_TARGET_DELETE_TIME = 3600
+
+        # These aren't really secret.
+        OIDC_CLIENT_SECRETS = path.join(confdir, 'client_secrets.json')
+        OIDC_REQUIRED_SCOPE = '{{ mbs_oidc_required_scope }}'
+
+        # Don't let people submit yaml directly.  it has to come from dist-git
+        YAML_SUBMIT_ALLOWED = False
+
+        # Set the priority to 4 to have higher priority than F27 mass rebuild.
+        KOJI_BUILD_PRIORITY = 4
+
+        # Check branch EOL before building.  Block EOL modules from building.
+        # https://pagure.io/fm-orchestrator/issue/960
+        # Because of https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/thread/KGXBMTUR72FHQEG7IBHDPPX276QHSD2I/#MFT5SAWPKMCNLKAWEJFCFIVX5GJ7RBSP
+        # we decided to hold on to this and ask the maintainers to create a
+        # releng ticket to retire their modules.
+        CHECK_FOR_EOL = False
+
+        # Koji Content Generator "-devel" modules aren't used in Fedora, so we can just disable them
+        KOJI_CG_DEVEL_MODULE = False

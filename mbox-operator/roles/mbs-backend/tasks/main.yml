@@ -30,7 +30,6 @@
     - set_fact:
         psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
 
-
 - name: create temporary component directory
   tempfile:
     state: directory

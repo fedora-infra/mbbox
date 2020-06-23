@@ -8,3 +8,15 @@ spec:
   koji_pvc_size: 10Gi
   root_ca_secret_name: mbox-koji-root-ca
   koji_hub_host: koji-hub:8443
+  mq_topic_prefix: 'org.fedoraproject.dev'
+  mbs:
+    configmap: mbs-configmap
+    fedora_versions:
+      - '32'
+    scm_repo_url: 'git+https://src.fedoraproject.org/modules/'
+    rpm_repo_url: 'git+https://src.fedoraproject.org/rpms/'
+    pkg_repo_url: 'https://src.fedoraproject.org/repo/pkgs/'
+    pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+    oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
+    backend_config_messaging: fedmsg
+    topic_prefix: 'org.fedoraproject.dev'

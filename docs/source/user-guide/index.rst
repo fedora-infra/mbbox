@@ -13,3 +13,4 @@ User Guide
    kojira
    mbs-backend
    mbs-frontend
+   mbox

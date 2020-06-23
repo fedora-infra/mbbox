@@ -14,6 +14,7 @@
 
 - set_fact:
     postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
+    mbs_configmap: "{{ k8s_mboxes.resources[0].spec.mbs.configmap }}"
   when: mbs_frontend_mbox|length > 0
 
 - block:
@@ -48,6 +49,14 @@
         namespace: "{{ meta.namespace }}"
         src: "{{ mbs_frontend_dir.path }}/mbs-frontend.configmap.yaml"
 
+- name: check if mbs-configmap exists
+  k8s_info:
+    api_version: v1
+    kind: ConfigMap
+    namespace: "{{ meta.namespace }}"
+    name: "{{ mbs_configmap }}"
+  register: k8s_mbs_cm
+
 - block:
     - name: ensure mbs configmap
       template:
@@ -63,6 +72,7 @@
         wait: true
         namespace: "{{ meta.namespace }}"
         src: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
+  when: k8s_mbs_cm.resources|length == 0
 
 - include_tasks: cert.yml
 

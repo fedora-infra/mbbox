@@ -1,5 +1,5 @@
 ---
-- name: create temporary mbox directory
+- name: mbox.tmpdir.create
   tempfile:
     state: directory
     prefix: mbox
@@ -9,7 +9,7 @@
 - include_tasks: cert.yml
 
 - block:
-    - name: check if postgresql secret exists
+    - name: mbox.secret.psql.read
       k8s_info:
         api_version: v1
         kind: Secret
@@ -49,3 +49,44 @@
               matchLabels:
                 app: mbox
       when: k8s_mbox_pvc_query.resources|length == 0
+
+- block:
+    - name: mbox.mbs.configmap.create
+      k8s_info:
+        api_version: v1
+        kind: Configmap
+        namespace: "{{ meta.namespace }}"
+        name: "{{ mbox_mbs.configmap }}"
+      register: k8s_mbs_cm
+    - template:
+        src: mbs.configmap.yaml.j2
+        dest: "{{ mbox_dir.path }}/mbs.configmap.yaml"
+      vars:
+        mbs_configmap: "{{ mbox_mbs.configmap }}"
+        mbs_fedora_versions: "{{ mbox_mbs.fedora_versions }}"
+        mbs_hub_host: "{{ mbox_koji_hub_host }}"
+        mbs_messaging_system: "{{ mbox_mbs.backend_config_messaging }}"
+        mbs_topic_prefix: "{{ mbox_mbs.topic_prefix }}"
+        mbs_scm_url: "{{ mbox_mbs.scm_repo_url }}"
+        mbs_rpms_default_repository: "{{ mbox_mbs.rpm_repo_url }}"
+        mbs_rpms_default_cache: "{{ mbox_mbs.pkg_repo_url }}"
+        mbs_modules_default_repository: "{{ mbox_mbs.scm_repo_url }}"
+        mbs_psql_user: "{{ k8s_psql_secrets.resources[0].data.POSTGRES_USER | b64decode }}"
+        mbs_psql_pass: "{{ k8s_psql_secrets.resources[0].data.POSTGRES_PASSWORD | b64decode }}"
+        mbs_psql_hostname: "{{ k8s_psql_secrets.resources[0].data.POSTGRES_HOST | b64decode }}"
+        mbs_psql_db_name: "{{ k8s_psql_secrets.resources[0].data.POSTGRES_DB | b64decode }}"
+        mbs_pdc_url: "{{ mbox_mbs.pdc_url }}"
+        mbs_oidc_required_scope: "{{ mbox_mbs.oidc_required_scope }}"
+      when: k8s_mbs_cm.resources|length == 0
+    - k8s:
+        src: "{{ mbox_dir.path }}/mbs.configmap.yaml"
+        wait: true
+        state: present
+        namespace: "{{ meta.namespace }}"
+      when: k8s_mbs_cm.resources|length == 0
+  when: mbox_mbs|length > 0
+
+- name: mbs.tmp_dir.delete
+  file:
+    path: "{{ mbox_dir.path }}"
+    state: absent

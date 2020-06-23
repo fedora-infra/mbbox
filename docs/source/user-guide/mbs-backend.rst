@@ -189,7 +189,7 @@ Configures the scm containing the module definitions
 
 
 config_koji_repo_url
---------------
+--------------------
 
 Configures the koji rpm repository
 
@@ -199,9 +199,9 @@ config_pdc_url
 Configures the URL for the Product Definition Centre
 
 fedora_versions
---------------
+---------------
 
-The versions for the Fedora 32
+The versions of the Fedora we need to generate module template for.
 
 shared_pvc
 ----------
@@ -227,29 +227,29 @@ Create a file mbmbsbackend-cr.yaml containing the following content (modify as n
 
 .. code-block:: yaml
 
-apiVersion: apps.fedoraproject.org/v1alpha1
-kind: MBMbsBackend
-metadata:
-  name: example-mb-mbs-backend
-spec:
-  hub_username: mbs
-  hub_url: "https://koji:8443"
-  cacert_secret: koji-hub-ca-cert
-  client_cert_secret: mbs-client-cert
-  configmap: mbs-backend-configmap
-  postgres_secret: postgres
-  consumer: true
-  poller: true
-  fedora_versions: ['32']
-  config_system: 'koji'
-  config_messaging: 'fedmsg'
-  config_topic_prefix: 'org.fedoraproject.dev'
-  config_scm_url: 'git+https://src.fedoraproject.org/modules/'
-  config_rpms_def_repo: 'git+https://src.fedoraproject.org/rpms/'
-  config_rpms_def_cache: 'https://src.fedoraproject.org/repo/pkgs/'
-  config_modules_def_repo: 'git+https://src.fedoraproject.org/modules/'
-  config_koji_repo_url: 'https://kojipkgs.stg.fedoraproject.org/repos'
-  config_pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+  apiVersion: apps.fedoraproject.org/v1alpha1
+  kind: MBMbsBackend
+  metadata:
+    name: example-mb-mbs-backend
+  spec:
+    hub_username: mbs
+    hub_url: "https://koji:8443"
+    cacert_secret: koji-hub-ca-cert
+    client_cert_secret: mbs-client-cert
+    configmap: mbs-backend-configmap
+    postgres_secret: postgres
+    consumer: true
+    poller: true
+    fedora_versions: ['32']
+    config_system: 'koji'
+    config_messaging: 'fedmsg'
+    config_topic_prefix: 'org.fedoraproject.dev'
+    config_scm_url: 'git+https://src.fedoraproject.org/modules/'
+    config_rpms_def_repo: 'git+https://src.fedoraproject.org/rpms/'
+    config_rpms_def_cache: 'https://src.fedoraproject.org/repo/pkgs/'
+    config_modules_def_repo: 'git+https://src.fedoraproject.org/modules/'
+    config_koji_repo_url: 'https://kojipkgs.stg.fedoraproject.org/repos'
+    config_pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
 
 Run the following command to create a mbs-backend resource:
   
