@@ -25,7 +25,7 @@ Prepare MBBox deployment
 
 To prepare cluster for MBBox deployment you just need to run following command with the Makefile mentioned earlier in this guide.
 
-.. code-block::
+.. code-block:: bash
 
    make deploy
 
@@ -45,7 +45,7 @@ In case you have PostgreSQL DB running in cluster you can skip this step and jus
 
 To deploy PostgreSQL DB you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/psql>`_. You can change anything in those files, especially secret file. To deploy it run the following.
 
-.. code-block::
+.. code-block:: bash
 
    kubectl apply -f components/psql -n <namespace>
 
@@ -56,7 +56,7 @@ In case you have a running RabbitMQ server in your cluster, you can skip this st
 
 To deploy RabbitMQ you can use the one `prepared by us <https://github.com/fedora-infra/mbbox/tree/master/components/rabbitmq>`_. You can change anything in those files, especially secret file. Refer to the `README.md` file for instructions about certificates. To deploy it run the following.
 
-.. code-block::
+.. code-block:: bash
 
    kubectl apply -f components/rabbitmq -n <namespace>
 
@@ -70,7 +70,7 @@ Before deploying CR check the variables configuration. Please refer to :ref:`use
 
 To deploy the CR simply run:
 
-.. code-block::
+.. code-block:: bash
 
    make prepare/crs
 
