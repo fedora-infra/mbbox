@@ -17,57 +17,47 @@ Dependencies
 Parameters
 ==========
 
-+-------------------------+-----------------------------------------------+---------+
-| Name                    | Default Value                                 | Type    |
-+=========================+===============================================+=========+
-| image                   | quay.io/fedora/mbs-backend:latest             | string  |
-+-------------------------+-----------------------------------------------+---------+
-| replicas                | 1                                             | int     |
-+-------------------------+-----------------------------------------------+---------+
-| configmap               | mbs-backend-configmap                         | string  |
-+-------------------------+-----------------------------------------------+---------+
-| shared_pvc              | koji-hub-mnt-pvc                              | string  |
-+-------------------------+-----------------------------------------------+---------+
-| cacert_secret           | mbs-ca-cert                                   | string  |
-+-------------------------+-----------------------------------------------+---------+
-| client_cert_secret      | mbs-client-cert                               | string  |
-+-------------------------+-----------------------------------------------+---------+
-| hub_username            | mbs                                           | string  |
-+-------------------------+-----------------------------------------------+---------+
-| hub_url                 | 'https://koji-hub:8443'                       | string  |
-+-------------------------+-----------------------------------------------+---------+
-| consumer                | true                                          | string  |
-+-------------------------+-----------------------------------------------+---------+
-| poller                  | true                                          | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_system           | koji                                          | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_messaging        | fedmsg                                        | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_topic_prefix     | org.fedoraproject.dev                         | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_scm_url          | git+https://src.fedoraproject.org/modules/    | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_rpms_def_repo    | git+https://src.fedoraproject.org/rpms/       | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_rpms_def_cache   | https://src.fedoraproject.org/repo/pkgs/      | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_modules_def_repo | git+https://src.fedoraproject.org/modules/    | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_koji_repo_url    | https://kojipkgs.stg.fedoraproject.org/repos  | string  |
-+-------------------------+-----------------------------------------------+---------+
-| config_pdc_url          | https://pdc.stg.fedoraproject.org/rest_api/v1 | string  |
-+-------------------------+-----------------------------------------------+---------+
-| host_name               | koji-hub:8443                                 | string  |
-+-------------------------+-----------------------------------------------+---------+
-| ssl_verify              | true                                          | boolean |
-+-------------------------+-----------------------------------------------+---------+
-| fedora_versions         | ['32']                                        |[string] |
-+-------------------------+-----------------------------------------------+---------+
-| shared_pvc              | koji-hub-mnt-pvc                              | string  |
-+-------------------------+-----------------------------------------------+---------+
-| mbox                    | ""                                            | string  |
-+-------------------------+-----------------------------------------------+---------+
++----------------------------+---------------------------------------------------+---------+
+| Name                       | Default Value                                     | Type    |
++============================+===================================================+=========+
+| image                      | quay.io/fedora/mbs-backend:latest                 | string  |
++----------------------------+---------------------------------------------------+---------+
+| replicas                   | 1                                                 | int     |
++----------------------------+---------------------------------------------------+---------+
+| hub_username               | mbs                                               | string  |
++----------------------------+---------------------------------------------------+---------+
+| cacert_secret              | mbs-ca-cert                                       | string  |
++----------------------------+---------------------------------------------------+---------+
+| client_cert_secret         | mbs-client-cert                                   | string  |
++----------------------------+---------------------------------------------------+---------+
+| postgres_secret            | postgres                                          | string  |
++----------------------------+---------------------------------------------------+---------+
+| mbs_configmap              | mbs-configmap                                     | string  |
++----------------------------+---------------------------------------------------+---------+
+| fedora_versions            | ['32']                                            |[string] |
++----------------------------+---------------------------------------------------+---------+
+| hub_host                   | 'koji-hub:8443'                                   | string  |
++----------------------------+---------------------------------------------------+---------+
+| messaging_system           | 'fedmsg'                                          | string  |
++----------------------------+---------------------------------------------------+---------+
+| topic_prefix               | 'org.fedoraproject.dev'                           | string  |
++----------------------------+---------------------------------------------------+---------+
+| scm_url                    | 'git+https://src.fedoraproject.org/modules/'      | string  |
++----------------------------+---------------------------------------------------+---------+
+| rpms_default_repository    | 'git+https://src.fedoraproject.org/rpms/'         | string  |
++----------------------------+---------------------------------------------------+---------+
+| rpms_default_cache         | 'https://src.fedoraproject.org/repo/pkgs/'        | string  |
++----------------------------+---------------------------------------------------+---------+
+| modules_default_repository | 'git+https://src.fedoraproject.org/modules/'      | string  |
++----------------------------+---------------------------------------------------+---------+
+| pdc_url                    | 'https://pdc.stg.fedoraproject.org/rest_api/v1'   | string  |
++----------------------------+---------------------------------------------------+---------+
+| oidc_required_scope        | 'https://mbs.fedoraproject.org/oidc/submit-build' | string  |
++----------------------------+---------------------------------------------------+---------+
+| shared_pvc                 | koji-hub-mnt-pvc                                  | string  |
++----------------------------+---------------------------------------------------+---------+
+| mbox                       | ""                                                | string  |
++----------------------------+---------------------------------------------------+---------+
 
 
 image
@@ -80,17 +70,10 @@ replicas
 
 The amount of mbs-backend replicas to deploy.
 
-configmap
----------
+hub_username
+-------------
 
-The configmap name to use when deploying mbs-backend
-
-This configmap object contains configuration files that are mounted in mbs-backend pod filesystem.
-
-shared_pvc
-----------
-
-Shared PVC to be able to use the repository setup by koji-builder, defaults to koji-hub-mnt-pvc
+User to use when authenticating with koji-hub.
 
 cacert_secret
 -------------
@@ -129,79 +112,80 @@ Secret format:
       This is a combination of tls.key and tls.crt separated by '\n' and encoded in base64
       Example: "{{ (lookup('file', 'client_key.pem') + '\n' + lookup('file', 'client_cert.pem')) | b64encode }}"
 
-hub_username
--------------
+postgres_secret
+---------------
 
-User to use when authenticating with koji-hub.
+Postgresql secret used by MBS to connect to a psql instance.
 
-hub_url
--------
+Deployment will fail if this secret is not present.
 
-Location of the koji-hub to connect to.
+Secret format:
 
-consumer
---------
+.. code-block:: yaml
 
-Sets up to consume messages through fedmsg.
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: postgres
+    labels:
+      app: postgres
+  data:
+    POSTGRES_HOST: fillme
+    POSTGRES_DB: fillme
+    POSTGRES_USER: fillme
+    POSTGRES_PASSWORD: fillme
 
-poller
-------
+configmap
+---------
 
-Sets up a poller to watch for the status of module builds.
+The configmap name to use when deploying configuration shared between mbs-frontend and mbs-backend component.
 
-config_system
--------------
-
-Configures the buildsystem to use. We assume koji as the default.
-
-config_messaging
-----------------
-
-Configures the messaging system to use. We assume fedmsg as the default.
-
-config_topic_prefix
--------------------
-
-Configures the topic prefix for the messages we are interested in.
-
-
-config_scm_url
---------------
-
-Configures the scm containing the module definitions
-
-config_rpms_def_repo
---------------------
-
-Configures the scm containing the srpm definitions
-
-
-config_rpms_def_cache
----------------------
-
-Configures the scm containing the package cache
-
-
-config_modules_def_repo
------------------------
-
-Configures the scm containing the module definitions
-
-
-config_koji_repo_url
---------------------
-
-Configures the koji rpm repository
-
-config_pdc_url
---------------
-
-Configures the URL for the Product Definition Centre
+This configmap contains configuration files that are shared between mbs-frontend and mbs-backend.
 
 fedora_versions
 ---------------
 
-The versions of the Fedora we need to generate module template for.
+The versions of the Fedora we need to generate module template for. 
+
+messaging_system
+----------------
+
+Messaging system to use when sending messages. Support for fedora messaging is not available in MBS for now.
+
+topic_prefix
+------------
+
+Prefix of the topic for messaging system.
+
+config_scm_url
+--------------
+
+Source Code Management git URL for modules, should contain repositories for modules builds definitions.
+
+rpms_default_repository
+-----------------------
+
+Default repository git URL for RPMS.
+
+rpms_default_cache
+------------------
+
+Default cache URL for RPMS.
+
+modules_default_repository
+--------------------------
+
+Default repository git URL for modules.
+
+pdc_url
+-------
+
+Product Definition Center URL.
+
+oidc_required_scope
+-------------------
+
+OIDC required scope URL.
 
 shared_pvc
 ----------
@@ -211,12 +195,24 @@ Name of the shared PersistentVolumeClaim mbs-backend will use.
 mbox
 ----
 
-A Mbox resource name to retrieve shared data from (pvc volume and shared certs).
+A Mbox resource name to retrieve shared data from (pvc volume, shared certs and shared MBS configmap).
 
 MBS Backend will use the following vars if this property is missing:
 
 * shared_pvc (shared koji mnt volume)
 * cacert_secret (root ca secret)
+* postgres_secret (PSQL secret)
+* configmap (shared configmap name) 
+* fedora_versions (versions of fedora for module templates)
+* hub_host (Koji host URL)
+* messaging_system (messaging system to use)
+* topic_prefix (topic prefix for messaging system)
+* scm_url (URL for SCM)
+* rpms_default_repository (default URL for RPMS repositories) 
+* rpms_default_cache (default cache URL)
+* modules_default_repository (default URL for modules repositories)
+* pdc_url (URL for PDC)
+* oidc_required_scope (OIDC required scope URL)
 
 Usage
 =====
@@ -232,24 +228,25 @@ Create a file mbmbsbackend-cr.yaml containing the following content (modify as n
   metadata:
     name: example-mb-mbs-backend
   spec:
+    replicas: 1
+    image: quay.io/fedora/mbs-backend:latest
     hub_username: mbs
-    hub_url: "https://koji:8443"
     cacert_secret: koji-hub-ca-cert
     client_cert_secret: mbs-client-cert
-    configmap: mbs-backend-configmap
     postgres_secret: postgres
-    consumer: true
-    poller: true
+    configmap: mbs-configmap
     fedora_versions: ['32']
-    config_system: 'koji'
-    config_messaging: 'fedmsg'
-    config_topic_prefix: 'org.fedoraproject.dev'
-    config_scm_url: 'git+https://src.fedoraproject.org/modules/'
-    config_rpms_def_repo: 'git+https://src.fedoraproject.org/rpms/'
-    config_rpms_def_cache: 'https://src.fedoraproject.org/repo/pkgs/'
-    config_modules_def_repo: 'git+https://src.fedoraproject.org/modules/'
-    config_koji_repo_url: 'https://kojipkgs.stg.fedoraproject.org/repos'
-    config_pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+    hub_host: 'koji-hub:8443'
+    messaging_system: 'fedmsg'
+    topic_prefix: 'org.fedoraproject.dev'
+    scm_url: 'git+https://src.fedoraproject.org/modules/'
+    rpms_default_repository: 'git+https://src.fedoraproject.org/rpms/' 
+    rpms_default_cache: 'https://src.fedoraproject.org/repo/pkgs/'
+    modules_default_repository: 'git+https://src.fedoraproject.org/modules/'
+    pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+    oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
+    shared_pvc: 'koji-hub-mnt-pvc'
+    # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
 
 Run the following command to create a mbs-backend resource:
   

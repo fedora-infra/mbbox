@@ -13,7 +13,8 @@
   when: mbs_backend_mbox|length > 0
 
 - set_fact:
-    postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
+    mbs_backend_postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
+    mbs_configmap: "{{ k8s_mboxes.resources[0].spec.mbs.configmap }}"
   when: mbs_backend_mbox|length > 0
 
 - block:
@@ -22,10 +23,10 @@
         api_version: v1
         kind: Secret
         namespace: "{{ meta.namespace }}"
-        name: "{{ postgres_secret }}"
+        name: "{{ mbs_backend_postgres_secret }}"
       register: k8s_psql_secrets
     - fail:
-        msg: "Secret {{ postgres_secret }} not found in namespace {{ meta.namespace }}"
+        msg: "Secret {{ mbs_backend_postgres_secret }} not found in namespace {{ meta.namespace }}"
       when: k8s_psql_secrets.resources|length == 0
     - set_fact:
         psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
@@ -37,26 +38,30 @@
     suffix: backend
   register: mbs_dir
 
-- block:
-    - name: Ensure mbs_backend configmap 29 updated
-      template:
-        src: configmap.yml.j2
-        dest: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
-      vars:
-        mbs_backend_psql_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
-        mbs_backend_psql_db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
-        mbs_backend_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
-        mbs_backend_psql_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
+- name: check if mbs-configmap exists
+  k8s_info:
+    api_version: v1
+    kind: ConfigMap
+    namespace: "{{ meta.namespace }}"
+    name: "{{ mbs_configmap }}"
+  register: k8s_mbs_cm
 
+- block:
+    - name: ensure mbs configmap
+      template:
+        src: mbs-configmap.yaml.j2
+        dest: "{{ mbs_dir.path }}/mbs-configmap.yaml"
+      vars:
+        mbs_psql_hostname: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        mbs_psql_db_name: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
+        mbs_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
+        mbs_psql_pass: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
     - k8s:
         state: present
-        src: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
         wait: true
         namespace: "{{ meta.namespace }}"
-
-    - file:
-        path: "{{ mbs_dir.path }}/mbs-backend.configmap.yml"
-        state: absent
+        src: "{{ mbs_dir.path }}/mbs-configmap.yaml"
+  when: k8s_mbs_cm.resources|length == 0
 
 - include_tasks: cert.yml
 

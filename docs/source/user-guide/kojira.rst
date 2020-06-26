@@ -144,6 +144,7 @@ A Mbox resource name to retrieve shared data from such as shared pvc name.
 Koji-builder will use the following var if this property is missing:
 
 * shared_pvc (shared koji mnt volume)
+* cacert_secret (root ca secret)
 
 Usage
 =====

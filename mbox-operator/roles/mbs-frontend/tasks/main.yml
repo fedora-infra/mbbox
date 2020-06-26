@@ -13,7 +13,7 @@
   when: mbs_frontend_mbox|length > 0
 
 - set_fact:
-    postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
+    mbs_frontend_postgres_secret: "{{ k8s_mboxes.resources[0].spec.psql_secret_name }}"
     mbs_configmap: "{{ k8s_mboxes.resources[0].spec.mbs.configmap }}"
   when: mbs_frontend_mbox|length > 0
 
@@ -23,10 +23,10 @@
         api_version: v1
         kind: Secret
         namespace: "{{ meta.namespace }}"
-        name: "{{ postgres_secret }}"
+        name: "{{ mbs_frontend_postgres_secret }}"
       register: k8s_psql_secrets
     - fail:
-        msg: "Secret {{ postgres_secret }} not found in namespace {{ meta.namespace }}"
+        msg: "Secret {{ mbs_frontend_postgres_secret }} not found in namespace {{ meta.namespace }}"
       when: k8s_psql_secrets.resources|length == 0
     - set_fact:
         psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
@@ -63,6 +63,7 @@
         src: mbs-configmap.yaml.j2
         dest: "{{ mbs_frontend_dir.path }}/mbs-configmap.yaml"
       vars:
+        mbs_hub_host: "{{ mbs_frontend_koji_hub_host }}"
         mbs_psql_hostname: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
         mbs_psql_db_name: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
         mbs_psql_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"

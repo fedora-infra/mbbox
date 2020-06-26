@@ -6,23 +6,20 @@ spec:
   replicas: 1
   image: quay.io/fedora/mbs-backend:latest
   hub_username: mbs
-  hub_url: "https://koji:8443"
   cacert_secret: koji-hub-ca-cert
   client_cert_secret: mbs-client-cert
-  configmap: mbs-backend-configmap
   postgres_secret: postgres
-  consumer: true
-  poller: true
+  configmap: mbs-configmap
   fedora_versions: ['32']
-  config_system: 'koji'
-  config_messaging: 'fedmsg'
-  config_topic_prefix: 'org.fedoraproject.dev'
-  config_scm_url: 'git+https://src.fedoraproject.org/modules/'
-  config_rpms_def_repo: 'git+https://src.fedoraproject.org/rpms/'
-  config_rpms_def_cache: 'https://src.fedoraproject.org/repo/pkgs/'
-  config_modules_def_repo: 'git+https://src.fedoraproject.org/modules/'
-  config_koji_repo_url: 'https://kojipkgs.stg.fedoraproject.org/repos'
-  config_pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+  hub_host: 'koji-hub:8443'
+  messaging_system: 'fedmsg'
+  topic_prefix: 'org.fedoraproject.dev'
+  scm_url: 'git+https://src.fedoraproject.org/modules/'
+  rpms_default_repository: 'git+https://src.fedoraproject.org/rpms/' 
+  rpms_default_cache: 'https://src.fedoraproject.org/repo/pkgs/'
+  modules_default_repository: 'git+https://src.fedoraproject.org/modules/'
+  pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+  oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
   shared_pvc: 'koji-hub-mnt-pvc'
   # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
 
