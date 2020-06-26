@@ -5,6 +5,6 @@
         name: sphinx
         extra_args: --user
     - name: Build html documentation
-      command: make html
+      command: "make html SPHINXOPTS='-W'"
       args:
         chdir: "{{ansible_user_dir}}/{{zuul.project.src_dir}}/docs"
