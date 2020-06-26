@@ -39,7 +39,7 @@ Parameters
 +------------------------------+---------------------------------------------------+----------+
 | mbs.rpm_repo_url             | git+https://src.fedoraproject.org/rpms/           |  string  |
 +------------------------------+---------------------------------------------------+----------+
-| mbs.pkg_repo_url            | https://src.fedoraproject.org/repo/pkgs/          |  string  |
+| mbs.pkg_repo_url             | https://src.fedoraproject.org/repo/pkgs/          |  string  |
 +------------------------------+---------------------------------------------------+----------+
 | mbs.pdc_url                  | https://pdc.stg.fedoraproject.org/rest_api/v1     |  string  |
 +------------------------------+---------------------------------------------------+----------+
