@@ -40,7 +40,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: "{{ mbs_backend_configmap }}"
+          name: "{{ mbs_configmap }}"
       - name: cacert-volume
         secret:
           secretName: "{{ mbs_backend_cacert_secret }}"

@@ -267,6 +267,7 @@ Koji-builder will use the following vars if this property is missing to create/u
 
 * mnt_pvc_name (shared koji mnt volume)
 * ca_cert_secret (root ca secret)
+* postgres_secret (PSQL secret)
 
 Usage
 =====

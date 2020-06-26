@@ -1,14 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ mbs_backend_configmap }}
-  labels:
-    app: mbs-backend
+  name: {{ mbs_configmap }}
 data:
-{% for fedora_version in mbs_backend_config_fedora_versions %}
-  default_module_f{{fedora_version}}.yml: |-
+{% for fedora_version in mbs_fedora_versions %}
+  default_module_f{{ fedora_version }}.yml: |-
     data:
-      description: Fedora F{{fedora_version}} traditional base
+      description: Fedora {{ fedora_version }} traditional base
       license:
         module: [MIT]
       name: platform
@@ -20,33 +18,37 @@ data:
         srpm-buildroot:
           rpms: [bash, fedora-release, fedpkg-minimal, gnupg2, redhat-rpm-config, rpm-build,
             shadow-utils]
-      stream: f29
-      summary: Fedora F{{fedora_version}} traditional base
+      stream: f{{ fedora_version }}
+      summary: Fedora {{ fedora_version }} traditional base
       context: 00000000
       version: 5
       xmd:
         mbs:
           buildrequires: {}
-          commit: f{{fedora_version}}
+          commit: f{{ fedora_version }}
           requires: {}
-          koji_tag: module-f{{fedora_version}}-build
+          koji_tag: module-f{{ fedora_version }}-build
           mse: TRUE
     document: modulemd
     version: 1
 {% endfor %}
+
   koji.conf: |-
     [koji]
-    server = {{ mbs_backend_hub }}/kojihub
-    weburl = {{ mbs_backend_hub }}/koji
-    topurl = {{ mbs_backend_hub }}/kojifiles
+    server = https://{{ mbs_hub_host }}/kojihub
+    weburl = https://{{ mbs_hub_host }}/koji
+    topurl = https://{{ mbs_hub_host }}/kojifiles
     authtype = ssl
     ca = /etc/cacert/cert
     serverca = /etc/cacert/cert
-    cert = /tmp/clientcert.combined.pem
+    cert = /etc/clientcert/client.pem
+
   mock.cfg: |-
     # Nonsense, but what do we do...
+
   yum.conf: |-
     # Nonsense, but what do we do...
+
   config.py: |-
     from os import path
 
@@ -70,17 +72,18 @@ data:
         NET_TIMEOUT = 120
         NET_RETRY_INTERVAL = 30
 
-        SYSTEM = '{{ mbs_backend_config_system }}'
-        MESSAGING = '{{ mbs_backend_config_messaging }}'  # or amq
-        MESSAGING_TOPIC_PREFIX = [' {{ mbs_backend_config_topic_prefix }}']
+        SYSTEM = 'koji'
+        MESSAGING = '{{ mbs_messaging_system }}'  # or amq
+        MESSAGING_TOPIC_PREFIX = ['{{ mbs_topic_prefix }}']
         KOJI_CONFIG = '/etc/module-build-service/koji.conf'
         KOJI_PROFILE = 'koji'
         ARCHES = ['x86_64']
         KOJI_PROXYUSER = False
-        KOJI_REPOSITORY_URL = '{{ mbs_backend_hub }}/pkgs/repos'
+        KOJI_REPOSITORY_URL = 'https://{{ mbs_hub_host }}/pkgs/repos'
+        #PDC_URL = 'http://modularity.fedorainfracloud.org:8080/rest_api/v1'
         PDC_INSECURE = True
         PDC_DEVELOP = True
-        SCMURLS = ["{{ mbs_backend_config_scm_url }}"]
+        SCMURLS = ["{{ mbs_scm_url }}"]
 
         # How often should we resort to polling, in seconds
         # Set to zero to disable polling
@@ -93,12 +96,12 @@ data:
         # Old name https://pagure.io/fm-orchestrator/issue/574
         NUM_CONSECUTIVE_BUILDS = 5
 
-        RPMS_DEFAULT_REPOSITORY = '{{ mbs_backend_config_rpms_def_repo }}'
+        RPMS_DEFAULT_REPOSITORY = '{{ mbs_rpms_default_repository }}'
         RPMS_ALLOW_REPOSITORY = False
-        RPMS_DEFAULT_CACHE = '{{ mbs_backend_config_rpms_def_cache }}'
+        RPMS_DEFAULT_CACHE = '{{ mbs_rpms_default_cache }}'
         RPMS_ALLOW_CACHE = False
 
-        MODULES_DEFAULT_REPOSITORY = '{{ mbs_backend_config_modules_def_repo }}'
+        MODULES_DEFAULT_REPOSITORY = '{{ mbs_modules_default_repository }}'
         MODULES_ALLOW_REPOSITORY = False
 
         # Available backends are: console, file, journal.
@@ -134,7 +137,7 @@ data:
         REBUILD_STRATEGY = 'only-changed'
         REBUILD_STRATEGY_ALLOW_OVERRIDE = True
 
-        SQLALCHEMY_DATABASE_URI = 'postgresql://{{ mbs_backend_psql_user }}:{{ mbs_backend_psql_password }}@{{ mbs_backend_psql_host }}/{{ mbs_backend_psql_db }}'
+        SQLALCHEMY_DATABASE_URI = 'postgresql://{{ mbs_psql_user }}:{{ mbs_psql_pass }}@{{ mbs_psql_hostname }}/{{ mbs_psql_db_name }}'
 
         # https://pagure.io/fm-orchestrator/issue/334
         KOJI_PROXYUSER = False
@@ -148,8 +151,8 @@ data:
         # No, don't try to obtain a token (we just read.  we don't write.)
         PDC_DEVELOP = True
 
-        KOJI_REPOSITORY_URL = '{{ mbs_backend_config_koji_repo_url }}'
-        PDC_URL = '{{ mbs_backend_config_pdc_url }}'
+        KOJI_REPOSITORY_URL = 'https://kojipkgs.stg.fedoraproject.org/repos'
+        PDC_URL = '{{ mbs_pdc_url }}'
 
         RESOLVER = "db"
 
@@ -175,7 +178,7 @@ data:
 
         # These aren't really secret.
         OIDC_CLIENT_SECRETS = path.join(confdir, 'client_secrets.json')
-        OIDC_REQUIRED_SCOPE = 'https://mbs.fedoraproject.org/oidc/submit-build'
+        OIDC_REQUIRED_SCOPE = '{{ mbs_oidc_required_scope }}'
 
         # Don't let people submit yaml directly.  it has to come from dist-git
         YAML_SUBMIT_ALLOWED = False
