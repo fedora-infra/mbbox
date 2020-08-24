@@ -4,7 +4,7 @@ RUN dnf install --setopt tsflags= -y \
 koji koji-hub koji-web koji-hub-plugins \
 curl httpd mod_ssl postgresql fedora-messaging python3-mod_wsgi
 
-RUN curl https://infrastructure.fedoraproject.org/cgit/ansible.git/plain/roles/koji_hub/templates/fedmsg-koji-plugin.py -o /usr/lib/koji-hub-plugins/fedmsg-koji-plugin.py
+RUN curl https://pagure.io/fedora-infra/ansible/raw/master/f/roles/koji_hub/templates/fedmsg-koji-plugin.py -o /usr/lib/koji-hub-plugins/fedmsg-koji-plugin.py
 RUN rm -f /etc/kojiweb/web.conf && \
 ln -s /etc/koji-hub/kojiweb.conf /etc/kojiweb/web.conf
 RUN chown -R 1001:root /etc/koji-hub && \
