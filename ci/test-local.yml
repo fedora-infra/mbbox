@@ -16,7 +16,15 @@
     - name: Install libraries through pip 
       become: true
       pip:
-        name: ['molecule', 'kubernetes', 'openshift', 'docker', 'jmespath', 'yamllint']
+        name:
+          # using specific version numbers as a temporary workaround for ci jobs
+          # should work once we migrate to the latest operator-sdk version
+          - 'molecule==3.0.4'
+          - 'kubernetes==11.0.0'
+          - 'openshift==0.11.2'
+          - 'docker==4.2.1'
+          - 'jmespath==0.10.0'
+          - 'yamllint==1.23.0'
     - name: Run molecule
       become: true
       command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-local
