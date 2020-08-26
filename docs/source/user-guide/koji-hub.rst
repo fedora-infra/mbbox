@@ -24,47 +24,51 @@ Sample deployment files are provided for development/example purposes:
 Parameters
 ==========
 
-+----------------------+--------------------------------+---------+
-| Name                 | Default Value                  | Type    |
-+======================+================================+=========+
-| image                | quay.io/fedora/koji-hub:latest | string  |
-+----------------------+--------------------------------+---------+
-| replicas             | 1                              | int     |
-+----------------------+--------------------------------+---------+
-| persistent           | true                           | boolean |
-+----------------------+--------------------------------+---------+
-| host                 | koji-hub                       | string  |
-+----------------------+--------------------------------+---------+
-| configmap            | koji-hub                       | string  |
-+----------------------+--------------------------------+---------+
-| ca_cert_secret       | koji-hub-ca-cert               | string  |
-+----------------------+--------------------------------+---------+
-| service_cert_secret  | koji-hub-service-cert          | string  |
-+----------------------+--------------------------------+---------+
-| postgres_secret      | postgres                       | string  |
-+----------------------+--------------------------------+---------+
-| http_enabled         | true                           | boolean |
-+----------------------+--------------------------------+---------+
-| https_enabled        | true                           | boolean |
-+----------------------+--------------------------------+---------+
-| topic_prefix         | mbox_dev                       | string  |
-+----------------------+--------------------------------+---------+
-| fedora_messaging_url |                                | string  |
-+----------------------+--------------------------------+---------+
-| messaging_cert_cm    | koji-hub-msg                   | string  |
-+----------------------+--------------------------------+---------+
-| ingress_backend      | nginx                          | string  |
-+----------------------+--------------------------------+---------+
-| mbox                 | ""                             | string  |
-+----------------------+--------------------------------+---------+
-| httpd_pvc_name       | koji-hub-httpd-pvc             | string  |
-+----------------------+--------------------------------+---------+
-| httpd_pvc_size       | 1Gi                            | string  |
-+----------------------+--------------------------------+---------+
-| mnt_pvc_name         | koji-hub-mnt-pvc               | string  |
-+----------------------+--------------------------------+---------+
-| mnt_pvc_size         | 10Gi                           | string  |
-+----------------------+--------------------------------+---------+
++------------------------+--------------------------------+---------+
+| Name                   | Default Value                  | Type    |
++========================+================================+=========+
+| image                  | quay.io/fedora/koji-hub:latest | string  |
++------------------------+--------------------------------+---------+
+| replicas               | 1                              | int     |
++------------------------+--------------------------------+---------+
+| persistent             | true                           | boolean |
++------------------------+--------------------------------+---------+
+| host                   | koji-hub                       | string  |
++------------------------+--------------------------------+---------+
+| configmap              | koji-hub                       | string  |
++------------------------+--------------------------------+---------+
+| ca_cert_secret         | koji-hub-ca-cert               | string  |
++------------------------+--------------------------------+---------+
+| service_cert_secret    | koji-hub-service-cert          | string  |
++------------------------+--------------------------------+---------+
+| postgres_secret        | postgres                       | string  |
++------------------------+--------------------------------+---------+
+| http_enabled           | true                           | boolean |
++------------------------+--------------------------------+---------+
+| https_enabled          | true                           | boolean |
++------------------------+--------------------------------+---------+
+| topic_prefix           | mbox_dev                       | string  |
++------------------------+--------------------------------+---------+
+| fedora_messaging_url   |                                | string  |
++------------------------+--------------------------------+---------+
+| messaging_cert_cm      | koji-hub-msg                   | string  |
++------------------------+--------------------------------+---------+
+| ingress_backend        | nginx                          | string  |
++------------------------+--------------------------------+---------+
+| mbox                   | ""                             | string  |
++------------------------+--------------------------------+---------+
+| httpd_pvc_name         | koji-hub-httpd-pvc             | string  |
++------------------------+--------------------------------+---------+
+| httpd_pvc_size         | 1Gi                            | string  |
++------------------------+--------------------------------+---------+
+| mnt_pvc_name           | koji-hub-mnt-pvc               | string  |
++------------------------+--------------------------------+---------+
+| mnt_pvc_size           | 10Gi                           | string  |
++------------------------+--------------------------------+---------+
+| web_client_cert_secret | koji-hub-web-client-cert       | string  |
++------------------------+--------------------------------+---------+
+| web_client_username    | kojihub                        | string  |
++------------------------+--------------------------------+---------+
 
 
 image
@@ -268,6 +272,43 @@ Koji-builder will use the following vars if this property is missing to create/u
 * mnt_pvc_name (shared koji mnt volume)
 * ca_cert_secret (root ca secret)
 * postgres_secret (PSQL secret)
+
+web_client_cert_secret
+----------------------
+
+The koji-web secret name to use or create for koji-hub authentication.
+
+It will skip its creation (self signed) if one is already present.
+
+It needs to be created and signed using the root CA certificate and private key.
+
+It should have one key "client.pem" to store both private key and public certificate.
+
+The certificate's CN field will be used as username during authentication. 
+
+Secret format:
+
+.. code-block:: yaml
+
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: koji-hub-wen-client-cert-secret
+    namespace: default
+    labels:
+      app: koji-hub
+  data:
+    client.pem: -|
+      fillme
+
+
+web_client_username
+-------------------
+
+Koji web client username to be used when authenticating to koji-hub.
+
+This property will be ignored if not using a self-signed certificate generated by the operator.
+
 
 Usage
 =====

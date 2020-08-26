@@ -39,6 +39,9 @@ spec:
             - name: cacert-volume
               mountPath: /etc/cacert
               readOnly: true
+            - name: webcert-volume
+              mountPath: /etc/webcert
+              readOnly: true
             - name: service-cert-volume
               mountPath: /etc/servicecert
               readOnly: true
@@ -55,6 +58,9 @@ spec:
         - name: service-cert-volume
           secret:
             secretName: "{{ koji_hub_service_cert_secret }}"
+        - name: webcert-volume
+          secret:
+            secretName: "{{ koji_hub_web_client_cert }}"
         - name: config-volume
           configMap:
             name: "{{ koji_hub_configmap }}"
