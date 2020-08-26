@@ -53,6 +53,20 @@
                 - "'tls.key' in kojihub_secrets.resources[0].data"
 
       - block:
+          - name: 'TEST: kojihub.secret.koji-hub-web-client-cert'
+            k8s_info:
+              api_version: v1
+              kind: Secret
+              namespace: "{{ namespace }}"
+              name: koji-hub-web-client-cert
+            register: kojihub_secrets
+          - assert:
+              that:
+                - kojihub_secrets.resources|length == 1                
+                - kojihub_secrets.resources[0].metadata.labels['app'] == 'koji-hub'
+                - "'client.pem' in kojihub_secrets.resources[0].data"
+
+      - block:
           - name: 'TEST: kojihub.pvcs'
             k8s_info:
               api_version: v1

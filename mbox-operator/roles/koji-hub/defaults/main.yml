@@ -28,3 +28,6 @@ koji_hub_ingress_backend: "{{ ingress_backend | default('nginx') }}"
 koji_hub_admin_username: "{{ admin_username | default('kojiadmin') }}"
 
 koji_mbox: "{{ mbox | default('') }}"
+
+koji_hub_web_client_cert: "{{ web_client_cert | default('koji-hub-web-client-cert') }}"
+koji_hub_web_client_username: "{{ web_client_username | default('kojiweb') }}"
