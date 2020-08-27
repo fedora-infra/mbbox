@@ -130,7 +130,7 @@ data:
   kojiweb.conf: |-
     [web]
     SiteName = MBOX Koji
-    KojiHubURL = https://{{ koji_hub_host }}:8443/kojihub
+    KojiHubURL = https://{{ koji_hub_svc_name }}:{{ koji_hub_https_port }}/kojihub
     KojiFilesURL = https://{{ koji_hub_host }}/pkgs
     Secret = MboxKojiWeb
     LibPath = /usr/share/koji-web/lib

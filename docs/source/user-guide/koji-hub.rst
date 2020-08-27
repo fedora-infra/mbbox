@@ -91,7 +91,9 @@ Note: I will not create any external volumes if set to false.
 host
 ----
 
-The koji-hub hostname to be used on several config files such as httpd.
+The koji-hub hostname to be used on several config files and certificates such as httpd.
+
+This property should be set to the public base url of koji on production environments.
 
 configmap
 ---------
