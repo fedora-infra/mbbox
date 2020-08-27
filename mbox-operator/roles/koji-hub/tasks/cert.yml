@@ -74,6 +74,11 @@
         path: "{{ cert_dir.path }}/server_req.pem"
         privatekey_path: "{{ cert_dir.path }}/server_key.pem"
         common_name: "{{ koji_hub_host }}"
+        subject_alt_name:
+          - "DNS:{{ koji_hub_host }}"
+          - "DNS:{{ koji_hub_svc_name }}"
+          - "DNS:{{ koji_hub_svc_name }}.{{ meta.namespace }}.svc"
+          - "DNS:{{ koji_hub_svc_name }}.{{ meta.namespace }}.svc.cluster"
     - openssl_certificate:
         path: "{{ cert_dir.path }}/server_cert.pem"
         csr_path: "{{ cert_dir.path }}/server_req.pem"
