@@ -235,6 +235,7 @@ The kubernetes ingress backend to use when creating an ingress resource for koji
 Available choices:
 
 * nginx
+* openshift
 
 httpd_pvc_name
 --------------

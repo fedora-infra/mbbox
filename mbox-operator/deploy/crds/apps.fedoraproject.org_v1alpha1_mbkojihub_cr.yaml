@@ -8,7 +8,7 @@ spec:
   image: quay.io/fedora/koji-hub:latest
   replicas: 1
   persistent: true
-  host: 'koji-hub'
+  host: koji.mbox.dev # change it to match the external web url/route of koji-hub
   configmap: koji-hub
   ca_cert_secret: koji-hub-ca-cert
   service_cert_secret: koji-hub-service-cert
@@ -18,12 +18,12 @@ spec:
   topic_prefix: mbox_dev
   fedora_messaging_url: amqps://koji:something@rabbitmq
   messaging_cert_cm: koji-hub-msg
-  ingress_backend: nginx
+  ingress_backend: nginx # default
+  # ingress_backend: openshift
   httpd_pvc_name: koji-hub-httpd-pvc
   httpd_pvc_size: 1Gi
   mnt_pvc_name: koji-hub-mnt-pvc
   mnt_pvc_size: 10Gi
   web_client_cert_secret: koji-hub-web-client-cert
   web_client_username: kojiweb
-
   # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr
