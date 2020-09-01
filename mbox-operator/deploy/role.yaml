@@ -5,6 +5,12 @@ metadata:
   name: mbox-operator
 rules:
 - apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - '*'
+- apiGroups:
   - networking.k8s.io
   resources:
   - ingresses

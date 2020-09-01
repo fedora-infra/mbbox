@@ -103,7 +103,7 @@
   when: koji_mbox|length > 0
 
 - block:
-    - name: Apply koji-hub http service and ingress
+    - name: Apply koji-hub http service
       template:
         src: service.yml.j2
         dest: /tmp/service.yml
@@ -112,7 +112,11 @@
         src: /tmp/service.yml
         wait: true
         namespace: "{{ meta.namespace }}"
-    - template:
+  when: koji_hub_http_enabled
+
+- block:
+    - name: Apply koji-hub ingress
+      template:
         src: ingress.yml.j2
         dest: /tmp/ingress.yml
       vars:
@@ -124,7 +128,22 @@
         src: /tmp/ingress.yml
         wait: true
         namespace: "{{ meta.namespace }}"
-  when: koji_hub_http_enabled
+  when: koji_hub_ingress_backend != 'openshift'
+
+- block:
+    - name: Apply koji-hub openshift route
+      template:
+        src: openshift-route.yml.j2
+        dest: /tmp/openshift-route.yml
+      vars:
+        koji_hub_route_name: koji
+        koji_hub_route_svc: "{{ koji_hub_svc_name }}"
+    - k8s:
+        state: present
+        src: /tmp/openshift-route.yml
+        wait: true
+        namespace: "{{ meta.namespace }}"
+  when: koji_hub_ingress_backend == 'openshift'
 
 - block:
     - name: Apply koji-hub deployment
