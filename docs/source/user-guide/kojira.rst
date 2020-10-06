@@ -44,7 +44,9 @@ Parameters
 +----------------------+------------------------------------+---------+
 | cacert_secret        | koji-hub-ca-cert                   | string  |
 +----------------------+------------------------------------+---------+
-| client_cert_secret   | koji-builder-client-cert           | string  |
+| client_cert_secret   | kojira-client-cert                 | string  |
++----------------------+------------------------------------+---------+
+| admin_secret         | kojira-admin-cert                  | string  |
 +----------------------+------------------------------------+---------+
 | mbox                 | ""                                 | string  |
 +----------------------+------------------------------------+---------+
@@ -135,6 +137,13 @@ Secret format:
     tls.pem: -|
       This is a combination of tls.key and tls.crt separated by '\n' and encoded in base64
       Example: "{{ (lookup('file', 'client_key.pem') + '\n' + lookup('file', 'client_cert.pem')) | b64encode }}"
+
+admin_secret
+-------------
+
+A koji admin secret certificate.
+
+An admin level certificate is needed to add all required permissions to the kojira user.
 
 mbox
 ----

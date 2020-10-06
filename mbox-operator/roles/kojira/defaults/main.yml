@@ -9,6 +9,7 @@ kojira_src: "{{ src | default('no') }}"
 kojira_max_repo_tasks: "{{ max_repo_tasks | default(15) }}"
 kojira_repo_tasks_limit: "{{ repo_tasks_limit | default(15) }}"
 
+kojira_admin_secret: "{{ admin_secret | default('kojira-admin-cert') }}"
 kojira_cacert_secret: "{{ cacert_secret|default('kojira-ca-cert') }}"
 kojira_client_cert_secret: "{{ client_cert_secret|default('kojira-client-cert') }}"
 

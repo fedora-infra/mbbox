@@ -1,0 +1,8 @@
+[kojiadmin]
+weburl = https://{{ koji_hub_svc_name }}:{{ koji_hub_https_port }}/koji
+topurl = https://{{ koji_hub_svc_name }}:{{ koji_hub_https_port }}
+server = https://{{ koji_hub_svc_name }}:{{ koji_hub_https_port }}/kojihub
+;auth
+cert = {{ kojiadmin_cert_path }}
+serverca = {{ kojiadmin_ca_cert_path }}
+authtype = ssl

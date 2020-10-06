@@ -8,9 +8,12 @@
     pull_policy: Never
     REPLACE_IMAGE:   apps.fedoraproject.org/mbox-operator:testing
     custom_resource: "{{ lookup('file', '/'.join([deploy_dir, 'crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml'])) | from_yaml }}"
-
+    custom_resource_kojira: "{{ lookup('file', '/'.join([deploy_dir, 'crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml'])) | from_yaml }}"
+    custom_resource_kojibuilder: "{{ lookup('file', '/'.join([deploy_dir, 'crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml'])) | from_yaml }}"
   tasks:
     - import_tasks: '{{ playbook_dir }}/tasks/koji-hub.yml'
 
 
 - import_playbook: '{{ playbook_dir }}/../../default/asserts/koji-hub.yml'
+- import_playbook: '{{ playbook_dir }}/../../default/asserts/koji-builder.yml'
+- import_playbook: '{{ playbook_dir }}/../../default/asserts/kojira.yml'
