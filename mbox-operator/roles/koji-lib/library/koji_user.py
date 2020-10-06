@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # This file is part of the mbbox project.
 # Copyright (C) 2020  Red Hat, Inc.
 #
@@ -21,37 +19,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 DOCUMENTATION = '''
 ---
-module: koji_host
+module: koji_user
 
-short_description: Ansible module that ensures a koji host state in a remote koji-hub instance.
+short_description: Ansible module that ensures a koji user creation in a remote koji-hub instance.
 
 description:
-  - This module ensures that a koji host is added in koji
   - It requires a running koji-hub instance
+  - It requires koji-hub admin accesss
 
 options:
+    username:
+      description:
+        - a qualified and unique koji username
+      required: true
+    permissions:
+      description:
+        - A list of valid koji user permissions
+      required: true
     host:
-        description:
-            - a qualified and unique koji hostname
-        required: true
-    archs:
-        description:
-            - a list of valid koji host architectures
-        default: [x86_64]
+      description:
+        - a qualified and unique koji hostname
+      required: true
     server:
-        description:
-            - the full koji-hub server url
-        required: true
-    state:
-        description:
-            - the koji desired state
-        default: present
-        choices: present, absent
+      description:
+        - the full koji-hub server url
+      required: true
     ssl_auth:
-        description:
-            - a dictonary which contains the require ssl authentication info
+      description:
+        - a dictonary which contains the require ssl authentication info
     ssl_auth.cert:
       description:
         - the client pem file path to use, this file must contain both key and certificate in PEM format  
@@ -68,16 +66,17 @@ author:
 '''
 
 EXAMPLES = '''
-- koji_host:
-  server: https://koji-hub:8443/kojihub
-    host: myhost
-    archs: [x86_64]
-    channels: [default, createrepo]
+- koji_user:
+    server: https://koji-hub:8443/kojihub
+    username: kojira
+    permissions:
+      - repo
     ssl_auth:
       cert: /tmp/admin.pem
-      serverca:/tmp/ca.pem
+      serverca: /tmp/ca.pem
       verify: false
 '''
+
 
 from optparse import Values
 
@@ -91,11 +90,9 @@ def build():
   Builds an AnsibleModule object instance
   """
   spec = dict(
-    host=dict(type='str', required=True),
-    archs=dict(type='list', default=['x86_64']),
+    username=dict(type='str', required=True),
+    permissions=dict(type='list', required=True),
     server=dict(type='str', required=True),
-    state=dict(type='str', default='present', choices=['present', 'absent']),
-    channels=dict(type='list'),
     ssl_auth=dict(type='dict')
   )
   return AnsibleModule(
@@ -124,16 +121,9 @@ def ssl_config(module):
 
 
 def main():
-  """
-  Main funtion that runs the module. 
-  """
   module = build()
+
   config = {'server': module.params['server']}
-
-  archs = module.params['archs']
-  channels = module.params['channels']
-  host_name = module.params['host']
-
   if 'ssl_auth' in module.params:
     config.update(**ssl_config(module))
   else:
@@ -141,11 +131,11 @@ def main():
       skipped=False, 
       failed=True, 
       error='Missing authentication config')
-
+  
   options = Values(config)
   session_opts = koji.grab_session_options(options)
   session = koji.ClientSession(options.server, session_opts)
-  
+
   try:
     session.ssl_login(options.cert, None, options.serverca)
   except Exception as e:
@@ -154,35 +144,32 @@ def main():
       failed=True,
       error=str(e))
 
-  if not session.getHost(host_name):
+  username = module.params['username']
+  perms = module.params['permissions']
+
+  user = session.getUser(username)
+  if not user:
     try:
-      session.addHost(host_name, archs)
+      user = session.createUser(username)
     except Exception as e:
       module.fail_json(changed=False,
         skipped=False,
         failed=True,
-        msg=str(e))
+        error=str(e))
 
-  channel_errs = []
-  added_channels = []
-  for channel in channels:
+  for perm in perms:
     try:
-      session.addHostToChannel(host_name, channel, create=True)
-      added_channels.append(channel)
+      session.grantPermission(user, perm, True)
     except Exception as e:
-      if not str(e).endswith('is already subscribed to the %s channel' % channel):
-        channel_errs.append(str(e))
-  
-  if len(channel_errs) > 0:
-    module.fail_json(changed=False,
-      skipped=False,
-      failed=True,
-      msg=dir(channel_errs[0]),
-      error='Add Channel Error: ' + str(channel_errs))
+      if not 'already has permission' in str(e):
+        module.fail_json(changed=False,
+          skipped=False,
+          failed=True,
+          msg=str(e))
 
   module.exit_json(changed=True,
     skipped=False,
-    failed=False, result={'name': host_name, 'archs': archs, 'channels': added_channels})
+    failed=False, result={'username': username, 'perms': session.getUserPerms(user['id'])})
 
 
 if __name__ == '__main__':

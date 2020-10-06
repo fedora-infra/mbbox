@@ -92,6 +92,41 @@
         - "'Successful' in (cr | json_query('resources[].status.conditions[].reason'))"
       delay: 10
       retries: 30
+
+    - name: Create koji-builder custom resource
+      k8s:
+        state: present
+        namespace: '{{ namespace }}'
+        definition: "{{ custom_resource_kojibuilder }}"
+    - name: Wait 5m for reconciliation to run
+      k8s_info:
+        api_version: '{{ custom_resource_kojibuilder.apiVersion }}'
+        kind: '{{ custom_resource_kojibuilder.kind }}'
+        namespace: '{{ namespace }}'
+        name: '{{ custom_resource_kojibuilder.metadata.name }}'
+      register: cr
+      until:
+        - "'Successful' in (cr | json_query('resources[].status.conditions[].reason'))"
+      delay: 10
+      retries: 30
+
+    - name: Create kojia custom resource
+      k8s:
+        state: present
+        namespace: '{{ namespace }}'
+        definition: "{{ custom_resource_kojira }}"
+    - name: Wait 5m for reconciliation to run
+      k8s_info:
+        api_version: '{{ custom_resource_kojira.apiVersion }}'
+        kind: '{{ custom_resource_kojira.kind }}'
+        namespace: '{{ namespace }}'
+        name: '{{ custom_resource_kojira.metadata.name }}'
+      register: cr
+      until:
+        - "'Successful' in (cr | json_query('resources[].status.conditions[].reason'))"
+      delay: 10
+      retries: 30
+
   rescue:
     - name: debug cr
       ignore_errors: true
@@ -118,11 +153,13 @@
       register: debug_log
     - debug: var=debug_log
 
-    - shell: "kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}'` -n {{ namespace }}"
-      register: something
-    - debug: var=something
+    - name: debug operator
+      shell: "kubectl logs `kubectl get pod --selector name=mbox-operator -o jsonpath='{.items[0].metadata.name}' -n {{ namespace }}` -n {{ namespace }}"
+      register: operator_log
+    - debug:
+        msg: "{{ operator_log.stdout }}"
 
-    - command: kubectl get events
+    - command: "kubectl get events -n {{ namespace }}"
       register: log
     - debug: var=log
 

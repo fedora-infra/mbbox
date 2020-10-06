@@ -55,6 +55,9 @@
             cert: "{{ lookup('file', cert_dir.path + '/ca_cert.pem') | b64encode }}"
             key: "{{ lookup('file', cert_dir.path + '/ca_key.pem') | b64encode }}"
       when: k8s_cacert_query.resources|length == 0
+    - copy:
+        src: "{{  cert_dir.path }}/ca_cert.pem"
+        dest: "{{ lookup('env', 'HOME') }}/.koji/certs/ca.pem"
   when: koji_mbox|length == 0
 
 # koji-hub httpd cert
@@ -134,6 +137,9 @@
               app: koji-hub
           data:
             client.pem: "{{ (lookup('file', cert_dir.path + '/admin_key.pem') + '\n' + lookup('file', cert_dir.path + '/admin_cert.pem')) | b64encode }}"
+    - copy:
+        content: "{{ lookup('file', cert_dir.path + '/admin_key.pem') + '\n' + lookup('file', cert_dir.path + '/admin_cert.pem') }}"
+        dest: "{{ lookup('env', 'HOME') }}/.koji/certs/kojiadmin.pem"
   when: k8s_admin_cert_query.resources|length == 0
 
 # koji-web client cert

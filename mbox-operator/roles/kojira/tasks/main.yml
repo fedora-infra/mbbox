@@ -58,6 +58,52 @@
         namespace: "{{ meta.namespace }}"
         src: "{{ kojira_dir.path }}/kojira.deployment.yaml"
 
+- block:
+    - name: setup kojira user
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ kojira_admin_secret }}"
+      register: k8s_res
+    - fail:
+        msg: "Secret not found: {{ kojira_admin_secret }}"
+      when: k8s_res.resources|length == 0
+    - set_fact:
+        koji_admin_secret: "{{ k8s_res.resources[0] | from_yaml }}"
+    - copy:
+        content: "{{ koji_admin_secret.data['client.pem'] | b64decode }}"
+        dest: "{{ kojira_dir.path }}/admin.pem"
+    #
+    - k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ meta.namespace }}"
+        name: "{{ kojira_cacert_secret }}"
+      register: k8s_res1
+    - fail:
+        msg: "Secret not found: koji-hub-ca-cert"
+      when: k8s_res1.resources|length == 0
+    - set_fact:
+        koji_ca_secret: "{{ k8s_res1.resources[0] | from_yaml }}"
+    - copy:
+        content: "{{ koji_ca_secret.data['cert'] | b64decode }}"
+        dest: "{{ kojira_dir.path }}/ca.pem"
+    #
+    - koji_user:
+        server: "https://{{ kojira_hub_host }}/kojihub"
+        username: "{{ kojira_hub_username }}"
+        permissions:
+          - repo
+        ssl_auth:
+          cert: "{{ kojira_dir.path }}/admin.pem"
+          serverca: "{{ kojira_dir.path }}/ca.pem"
+          verify: false
+    - file:
+        state: absent
+        path: "{{ koji_dir.path }}"
+
+
 - name: cleanup
   file:
     path: "{{ kojira_dir.path }}"

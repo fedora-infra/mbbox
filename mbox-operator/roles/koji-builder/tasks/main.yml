@@ -62,7 +62,8 @@
     - koji_host:
         server: "{{ koji_builder_koji_hub_url }}/kojihub"
         host: "{{ koji_builder_host_name }}"
-        arch: "{{ koji_builder_host_arch }}"
+        archs: "{{ koji_builder_host_archs }}"
+        channels: "{{ koji_builder_host_channels }}"
         ssl_auth:
           cert: "{{ koji_dir.path }}/admin.pem"
           serverca: "{{ koji_dir.path }}/ca.pem"

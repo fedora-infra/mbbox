@@ -1,5 +1,20 @@
 ---
 - block:
+    - name: set koji-hub config file
+      file:
+        path: "{{ lookup('env', 'HOME') }}/.koji/{{ item }}"
+        state: directory
+      with_items:
+        - config.d
+        - certs
+    - template:
+        src: kojiadmin.conf.j2
+        dest: "{{ lookup('env', 'HOME') }}/.koji/config.d/kojiadmin.conf"
+      vars:
+        kojiadmin_cert_path: "{{ lookup('env', 'HOME') }}/.koji/certs/kojiadmin.pem"
+        kojiadmin_ca_cert_path: "{{ lookup('env', 'HOME') }}/.koji/certs/ca.pem"
+
+- block:
     - name: retrieve mbox resource
       k8s_info:
         api_version: apps.fedoraproject.org/v1alpha1

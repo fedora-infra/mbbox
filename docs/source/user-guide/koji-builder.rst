@@ -19,37 +19,39 @@ Koji builder depends on `koji-hub <koji-hub.html#koji-hub>`_. This component is 
 Parameters
 ==========
 
-+----------------------+------------------------------------+---------+
-| Name                 | Default Value                      | Type    |
-+======================+====================================+=========+
-| image                | quay.io/fedora/koji-builder:latest | string  |
-+----------------------+------------------------------------+---------+
-| replicas             | 1                                  | int     |
-+----------------------+------------------------------------+---------+
-| configmap            | koji-builder-configmap             | string  |
-+----------------------+------------------------------------+---------+
-| cacert_secret        | koji-hub-ca-cert                   | string  |
-+----------------------+------------------------------------+---------+
-| client_cert_secret   | koji-builder-client-cert           | string  |
-+----------------------+------------------------------------+---------+
-| koji_hub_user        | 'koji-builder.mbox.dev'            | string  |
-+----------------------+------------------------------------+---------+
-| koji_hub_url         | 'https://koji-hub:8443'            | string  |
-+----------------------+------------------------------------+---------+
-| max_jobs             | 5                                  | int     |
-+----------------------+------------------------------------+---------+
-| vendor               | MBox                               | string  |
-+----------------------+------------------------------------+---------+
-| host_arch            | x86                                | string  |
-+----------------------+------------------------------------+---------+
-| host_name            | koji-hub:8443                      | string  |
-+----------------------+------------------------------------+---------+
-| ssl_verify           | true                               | boolean |
-+----------------------+------------------------------------+---------+
-| shared_pvc           | koji-hub-mnt-pvc                   | string  |
-+----------------------+------------------------------------+---------+
-| mbox                 | ""                                 | string  |
-+----------------------+------------------------------------+---------+
++----------------------+------------------------------------+----------+
+| Name                 | Default Value                      | Type     |
++======================+====================================+==========+
+| image                | quay.io/fedora/koji-builder:latest | string   |
++----------------------+------------------------------------+----------+
+| replicas             | 1                                  | int      |
++----------------------+------------------------------------+----------+
+| configmap            | koji-builder-configmap             | string   |
++----------------------+------------------------------------+----------+
+| cacert_secret        | koji-hub-ca-cert                   | string   |
++----------------------+------------------------------------+----------+
+| client_cert_secret   | koji-builder-client-cert           | string   |
++----------------------+------------------------------------+----------+
+| koji_hub_user        | 'koji-builder.mbox.dev'            | string   |
++----------------------+------------------------------------+----------+
+| koji_hub_url         | 'https://koji-hub:8443'            | string   |
++----------------------+------------------------------------+----------+
+| max_jobs             | 5                                  | int      |
++----------------------+------------------------------------+----------+
+| vendor               | MBox                               | string   |
++----------------------+------------------------------------+----------+
+| host_archs           | ["x86_64"]                         | [string] |
++----------------------+------------------------------------+----------+
+| host_name            | koji-hub:8443                      | string   |
++----------------------+------------------------------------+----------+
+| ssl_verify           | true                               | boolean  |
++----------------------+------------------------------------+----------+
+| shared_pvc           | koji-hub-mnt-pvc                   | string   |
++----------------------+------------------------------------+----------+
+| mbox                 | ""                                 | string   |
++----------------------+------------------------------------+----------+
+| host_channels        | ["default", "createrepo"]          | [string] |
++----------------------+------------------------------------+----------+
 
 
 image
@@ -126,10 +128,12 @@ vendor
 
 Koji-builder vendor used in rpm headers.
 
-host_arch
----------
+host_archs
+----------
 
-The koji builder host architecture.
+The list of supported koji builder host architectures.
+
+Defaults to a single architecture of "x86_64".
 
 host_name
 ---------
@@ -152,6 +156,13 @@ shared_pvc
 ----------
 
 Name of the shared PersistentVolumeClaim koji-builder will use.
+
+host_channels
+-------------
+
+A list of channels to add the koji-host to.
+
+Defaults to the following channels: "default" and "createrepo".
 
 mbox
 ----
@@ -185,12 +196,17 @@ Create a file containing the following content (modify as needed):
     cacert_secret: koji-hub-ca-cert
     client_cert_secret: koji-builder-client-cert
     koji_hub_user: 'koji-builder.mbox.dev'
-    mnt_pvc_name: koji-builder-mnt-pvc
-    mnt_pvc_size: 10Gi
     koji_hub_url: 'https://koji-hub:8443'
     max_jobs: 5
     vendor: MBox
-    mbox: 
+    host_archs:
+      - x86_64
+    host_channels:
+      - default
+      - createrepo
+    host_name: mbbox.default
+    ssl_verify: false
+    shared_pvc: koji-hub-mnt-pvc
 
 Run the following command to create a koji-builder resource:
   

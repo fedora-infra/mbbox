@@ -14,7 +14,8 @@ koji_builder_vendor: "{{ vendor|default('MBox') }}"
 
 koji_builder_admin_secret: "{{ admin_secret | default('koji-hub-admin-cert') }}"
 
-koji_builder_host_arch: "{{ host_arch | default('x86') }}"
+koji_builder_host_archs: "{{ host_archs | default(['x86_64']) }}"
+koji_builder_host_channels: "{{ host_channels | default(['default', 'createrepo']) }}"
 koji_builder_host_name: "{{ host_name | default('koji-hub:8443') }}"
 koji_builder_ssl_verify: "{{ ssl_verify | default(true) }}"
 
