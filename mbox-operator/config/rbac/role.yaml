@@ -1,0 +1,160 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+  ##
+  ## Base operator rules
+  ##
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - '*'
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+      - services
+      - services/finalizers
+      - pods
+      - pods/exec
+      - pods/log
+      - endpoints
+      - persistentvolumeclaims
+      - events
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: MBKojiBuilder
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mbkojibuilders
+      - mbkojibuilders/status
+      - mbkojibuilders/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: MBKojiHub
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mbkojihubs
+      - mbkojihubs/status
+      - mbkojihubs/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: MBKojira
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mbkojiras
+      - mbkojiras/status
+      - mbkojiras/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: MBMbsBackend
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mbmbsbackends
+      - mbmbsbackends/status
+      - mbmbsbackends/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: MBMbsFrontend
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mbmbsfrontends
+      - mbmbsfrontends/status
+      - mbmbsfrontends/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  ##
+  ## Rules for apps.fedoraproject.org/v1alpha1, Kind: Mbox
+  ##
+  - apiGroups:
+      - apps.fedoraproject.org
+    resources:
+      - mboxes
+      - mboxes/status
+      - mboxes/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+# +kubebuilder:scaffold:rules

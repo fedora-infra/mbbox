@@ -1,0 +1,9 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- apps_v1alpha1_mbkojihub.yaml
+- apps_v1alpha1_mbkojibuilder.yaml
+- apps_v1alpha1_mbkojira.yaml
+- apps_v1alpha1_mbmbsbackend.yaml
+- apps_v1alpha1_mbmbsfrontend.yaml
+- apps_v1alpha1_mbox.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

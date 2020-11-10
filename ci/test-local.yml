@@ -5,26 +5,53 @@
     - name: Install git, pip and moby
       become: true
       package:
-        name: ['git', 'moby-engine', 'python3-pip']
+        name: ['git', 'moby-engine', 'python3-pip', 'conntrack-tools']
         state: present
+    
+    - name: Ensure user is added to docker group
+      user:
+        name: "zuul-worker"
+        groups: ['docker']
+        append: yes
+      become: yes
+
+    - name: Reset ssh connection to allow user changes to affect 'current login user'
+      meta: reset_connection
+
     - name: Start docker
       become: true
       systemd:
         state: restarted
         daemon_reload: yes
         name: docker
-    - name: Install libraries through pip 
+    - name: Install libraries through pip
       become: true
       pip:
         name:
-          # using specific version numbers as a temporary workaround for ci jobs
-          # should work once we migrate to the latest operator-sdk version
-          - 'molecule==3.0.4'
-          - 'kubernetes==11.0.0'
-          - 'openshift==0.11.2'
-          - 'docker==4.2.1'
-          - 'jmespath==0.10.0'
-          - 'yamllint==1.23.0'
+          - 'ansible'
+          - 'molecule'
+          - 'openshift'
+          - 'kubernetes==11.0.0' # fixed version due to bugs with the latest version
+          - 'docker'
+          - 'jmespath'
+          - 'yamllint'
+          - 'molecule-docker'
+    - name: Download kustomize
+      get_url:
+        url: https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh
+        dest: /usr/bin/install_kustomize.sh
+        mode: '0755'
+      become: true
+    - name:  
+      command: ./install_kustomize.sh
+      args:
+        chdir: /usr/bin
+      become: true
     - name: Run molecule
       become: true
-      command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-local
+      shell: |
+        OPERATOR_IMAGE="apps.fedoraproject.org/mbox-operator:testing" \
+        KUBECONFIG="/tmp/molecule/kind-test-local/kubeconfig"
+        molecule test -s test-local
+      args:
+        chdir: "{{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator"

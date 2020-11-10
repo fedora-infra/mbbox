@@ -4,7 +4,8 @@
     name: [
             golang,
             docker,
-            kubernetes-client
+            kubernetes-client,
+            conntrack-tools
           ]
     state: present
 
@@ -19,7 +20,8 @@
       'docker',
       'kubernetes',
       'jmespath',
-      'openshift'
+      'openshift',
+      'molecule-docker'
     ]
 
 - name: Create docker group
@@ -34,6 +36,9 @@
     groups: ['docker']
     append: yes
   become: yes
+
+- name: Reset ssh connection to allow user changes to affect 'current login user'
+  meta: reset_connection
 
 - name: Start docker
   systemd:
@@ -72,10 +77,26 @@
 
 # We are running inside VM, so set default driver to none
 - name: Set minikube default driver to none
-  command: minikube config set vm-driver none
+  command: minikube config set driver docker
 
 - name: Start minikube cluster
-  command: minikube start
+  command: minikube start --force
+
+- name: Make .kube folder
+  file:
+    path: /.kube
+    state: directory
+  become: yes
+
+- name: Get minkube config
+  command: "minikube kubectl config view"
+  register: output
+
+- name: Copy config content
+  copy:
+    content: "{{ output.stdout }}"
+    dest: /.kube/config
+  become: yes
 
 - name: Enable ingress addon for minikube
   command: minikube addons enable ingress

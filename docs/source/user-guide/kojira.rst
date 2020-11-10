@@ -14,7 +14,7 @@ It is deployed in its own pod and shares a repo volume with other components suc
 Dependencies
 ============
 
-`Kojira Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbkojira_crd.yaml>`_
+`Kojira Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbkojira.yaml>`_
 
 Kojira depends on `koji-hub <koji-hub.html#koji-hub>`_. This component is deployed as part of the operator deployment.
 
@@ -158,7 +158,7 @@ Koji-builder will use the following var if this property is missing:
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojira_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbkojira.yaml>`_
 
 Create a file containing the following content (modify as needed):
 

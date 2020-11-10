@@ -1,0 +1,24 @@
+# permissions for end users to edit mbmbsbackends.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mbmbsbackend-editor-role
+rules:
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbmbsbackends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbmbsbackends/status
+  verbs:
+  - get

@@ -1,4 +1,43 @@
 ---
-- import_playbook: ../default/prepare/local-cluster.yml
+- name: Prepare
+  hosts: k8s
+  gather_facts: false
+  vars:
+    kubeconfig: "{{ lookup('env', 'KUBECONFIG') }}"
+  tasks:
+    - name: delete the kubeconfig if present
+      file:
+        path: '{{ kubeconfig }}'
+        state: absent
+      delegate_to: localhost
 
-- import_playbook: ../default/prepare/operator-resources.yml
+    - name: Fetch the kubeconfig
+      fetch:
+        dest: '{{ kubeconfig }}'
+        flat: true
+        src: /root/.kube/config
+
+    - name: Change the kubeconfig port to the proper value
+      replace:
+        regexp: 'server: http(s?):\/\/([0-9\.]+|localhost):[0-9]+'
+        replace: "server: https://localhost:{{ lookup('env', 'KIND_PORT') }}"
+        path: '{{ kubeconfig }}'
+      delegate_to: localhost
+
+    - shell: "cat {{ kubeconfig }}"
+      register: output
+      delegate_to: localhost
+    - debug:
+        var: output.stdout
+
+    - name: Wait for the Kubernetes API to become available (this could take a minute)
+      uri:
+        url: "https://localhost:8443/readyz"
+        status_code: 200
+        validate_certs: false
+      register: result
+      until: (result.status|default(-1)) == 200
+      retries: 60
+      delay: 5
+
+- import_playbook: '{{ playbook_dir }}/../default/prepare.yml'

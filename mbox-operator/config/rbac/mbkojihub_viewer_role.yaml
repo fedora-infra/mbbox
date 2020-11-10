@@ -1,0 +1,20 @@
+# permissions for end users to view mbkojihubs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mbkojihub-viewer-role
+rules:
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbkojihubs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbkojihubs/status
+  verbs:
+  - get

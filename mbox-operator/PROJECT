@@ -1,0 +1,23 @@
+domain: fedoraproject.org
+layout: ansible.sdk.operatorframework.io/v1
+projectName: mbox-operator
+resources:
+- group: apps
+  kind: MBKojiBuilder
+  version: v1alpha1
+- group: apps
+  kind: MBKojiHub
+  version: v1alpha1
+- group: apps
+  kind: MBKojira
+  version: v1alpha1
+- group: apps
+  kind: MBMbsBackend
+  version: v1alpha1
+- group: apps
+  kind: MBMbsFrontend
+  version: v1alpha1
+- group: apps
+  kind: Mbox
+  version: v1alpha1
+version: 3-alpha

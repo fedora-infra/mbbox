@@ -12,7 +12,7 @@ Mbox is a configuration resource that can be optionally used to defined shared c
 Dependencies
 ============
 
-`Mbox Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbox_crd.yaml>`_
+`Mbox Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbox.yaml>`_
 
 Parameters
 ==========
@@ -190,7 +190,7 @@ It will skip its creation and an existing one if it already exists.
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbox_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbox.yaml>`_
 
 Create a file containing the following content (modify as needed):
 

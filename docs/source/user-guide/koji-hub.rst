@@ -7,7 +7,7 @@ This page documents the usage of koji-hub crd.
 Dependencies
 ============
 
-`Koji-Hub Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbkojihubs_crd.yaml>`_
+`Koji-Hub Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbkojihubs.yaml>`_
 
 Koji-hub depends the following external components:
 
@@ -316,7 +316,7 @@ This property will be ignored if not using a self-signed certificate generated b
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojihub_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbkojihub.yaml>`_
 
 Create a file containing the following content (modify as needed):
 

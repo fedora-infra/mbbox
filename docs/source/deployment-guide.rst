@@ -11,6 +11,8 @@ To be able to deploy MBBox operator manually you need to have admin rights to cl
 
 To be able to deploy just the CR files you only need admin rights to namespace where you want to deploy operator.
 
+Some commands require the usage of the "kustomize" CLI tool which an be found `here <https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/>`_.
+
 Makefile
 ========
 
@@ -23,13 +25,14 @@ We have a `Makefile <https://github.com/fedora-infra/mbbox/blob/master/mbox-oper
 Prepare MBBox deployment
 ========================
 
-To prepare cluster for MBBox deployment you just need to run following command with the Makefile mentioned earlier in this guide.
+To prepare cluster for MBBox deployment you just need to run following commands with the Makefile mentioned earlier in this guide.
 
 .. code-block:: bash
 
+   make install
    make deploy
 
-This will apply CRDs files for MBBox and create roles, role bindings and service accounts.
+This will apply CRDs files for MBBox and create roles, role bindings, service accounts and deploy the mbbox operator.
 
 Create PVCs
 ===========
@@ -68,11 +71,11 @@ CR Deployment
 
 Before deploying CR check the variables configuration. Please refer to :ref:`user-guide-label` for information about variables.
 
-To deploy the CR simply run:
+A full deployment needs to deploy a couple of CRs in order, `kustomize` can be used to achieve that:
 
 .. code-block:: bash
 
-   make prepare/crs
+   kustomize build config/samples | kubectl apply -f -
 
 Delete Operator deployment
 ==========================
@@ -81,5 +84,6 @@ To delete operator deployment simply run:
 
 .. code-block:: bash
 
-   make delete/crs # This will delete only CRs
-   make delete # This will delete everything else except PostgreSQL DB and RabbitMQ server
+   kustomize build config/samples | kubectl delete -f -
+   make undeploy # This will delete the operator
+   make uninstall # this will uninstall CRDs, roles, etc
