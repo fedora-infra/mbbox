@@ -24,12 +24,6 @@
         path: '{{ kubeconfig }}'
       delegate_to: localhost
 
-    - shell: "cat {{ kubeconfig }}"
-      register: output
-      delegate_to: localhost
-    - debug:
-        var: output.stdout
-
     - name: Wait for the Kubernetes API to become available (this could take a minute)
       uri:
         url: "https://localhost:8443/readyz"

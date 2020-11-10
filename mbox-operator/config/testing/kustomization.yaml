@@ -21,5 +21,5 @@ resources:
 - ../manager
 images:
 - name: testing
-  newName: quay.io/lrossett/mbox-operator
-  newTag: dev
+  newName: apps.fedoraproject.org/mbox-operator
+  newTag: testing

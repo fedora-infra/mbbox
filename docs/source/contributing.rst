@@ -26,7 +26,6 @@ Tests can be run using either molecule or operator-sdk cli (which uses molecule 
 
   molecule test -s test-local #local tests, no need for a cluster
   molecule test -s test-cluster #needs a remote cluster, minikube is enough
-  operator-sdk test local #runs local tests as well, just a molecule cli wrapper
 
 Debugging Local Tests
 ---------------------
@@ -82,6 +81,7 @@ To start the vagrant operator SDK box, run the following in project root:
 .. code-block:: bash
 
    vagrant up #starts the vagrant VM, it could take a while
+   vagrant reload #this is needed to remount the sshfs mounts after reboot when cgroups are changed to V1
    vagrant ssh #connects you to the vagrant VM
 
 In vagrant VM you can find project folder in `~/devel`.

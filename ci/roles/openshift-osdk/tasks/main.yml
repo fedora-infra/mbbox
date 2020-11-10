@@ -6,4 +6,16 @@
 - name: Copy bashrc
   copy: src=.bashrc dest=/home/vagrant/.bashrc
 
+- name: Configure Cgroups v1 for docker in grub.cfg
+  replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="[^"]+)'
+    replace: '\1 systemd.unified_cgroup_hierarchy=0'
+
+- name: Generate the new grub configuration with cgroups v1
+  command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+- name: Reboot the machine
+  reboot:
+
 - import_tasks: operator-sdk.yml
