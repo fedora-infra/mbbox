@@ -1,3 +1,4 @@
-minikube_version: '1.15.2'
+minikube_version: '1.15.1-0'
 operator_sdk_version: '1.2.0'
+kustomize_version: '3.8.7'
 dev_username: vagrant

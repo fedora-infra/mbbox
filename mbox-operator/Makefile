@@ -1,3 +1,5 @@
+# Container image to use
+IMG = quay.io/fedora/mbox-operator:latest
 # Current Operator version
 VERSION ?= 0.0.1
 # Default bundle image tag

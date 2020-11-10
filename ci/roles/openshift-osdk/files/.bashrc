@@ -18,7 +18,7 @@ export PATH
 
 # User specific aliases and functions
 
-alias minikube='sudo minikube'
-alias oc='sudo oc'
-alias docker='sudo docker'
-alias operator_sdk='sudo operator-sdk'
+#alias minikube='sudo minikube'
+#alias oc='sudo oc'
+#alias docker='sudo docker'
+#alias operator_sdk='sudo operator-sdk'

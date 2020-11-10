@@ -6,7 +6,7 @@ require 'etc'
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
- config.vm.box = "fedora/30-cloud-base"
+ config.vm.box = "fedora/33-cloud-base"
 
 # Forward traffic on the host to the development server on the guest
 # config.vm.network "forwarded_port", guest: 5000, host: 5000

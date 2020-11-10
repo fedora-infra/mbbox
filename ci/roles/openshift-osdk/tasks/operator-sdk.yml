@@ -2,27 +2,22 @@
 - name: Install Operator SDK system dependencies
   dnf:
     name: [
-            golang,
+            ansible,
+            ansible-lint,
             docker,
+            kubernetes,
             kubernetes-client,
-            conntrack-tools
+            python-flake8,
+            python-molecule,
+            python-molecule-docker,
+            python-openshift
           ]
     state: present
 
-- name: Install Operator SDK python dependencies
+- name: Install Python dependencies
   pip:
-    name: [
-      'ansible',
-      'flake8',
-      'ansible-lint',
-      'molecule',
-      'molecule[docker]',
-      'docker',
-      'kubernetes',
-      'jmespath',
-      'openshift',
-      'molecule-docker'
-    ]
+    name: 
+      - kubernetes < 12.0.0
 
 - name: Create docker group
   group:
@@ -52,18 +47,6 @@
     policy: targeted
     state: permissive
 
-# Install origin-clients
-- name: Download oc binary
-  get_url:
-    url: https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-    dest: /tmp/
-
-- name: Extract oc binary
-  unarchive:
-    src: /tmp/oc.tar.gz
-    dest: /usr/local/bin
-    remote_src: yes
-
 # Install minikube
 - name: Download minikube
   get_url:
@@ -74,40 +57,39 @@
   dnf:
     name: /tmp/minikube-{{minikube_version}}.x86_64.rpm
     state: present
+    disable_gpg_check: true
 
-# We are running inside VM, so set default driver to none
-- name: Set minikube default driver to none
-  command: minikube config set driver docker
-
-- name: Start minikube cluster
-  command: minikube start --force
-
-- name: Make .kube folder
-  file:
-    path: /.kube
-    state: directory
+- name: Set minikube default driver to docker
+  command: minikube config set vm-driver docker
   become: yes
+  become_user: "{{ dev_username }}"
 
-- name: Get minkube config
-  command: "minikube kubectl config view"
-  register: output
+# Install kustomize
+- name: Retrieve kustomize
+  get_url:
+    url: https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh
+    dest: /tmp/install_kustomize.sh
+  
+- name: Create kustomize binary
+  command: bash /tmp/install_kustomize.sh {{ kustomize_version }}
+  args:
+    chdir: /tmp/
+    creates: /tmp/kustomize
 
-- name: Copy config content
+- name: Move kustomize binary to correct location
   copy:
-    content: "{{ output.stdout }}"
-    dest: /.kube/config
-  become: yes
-
-- name: Enable ingress addon for minikube
-  command: minikube addons enable ingress
+    src: /tmp/kustomize
+    dest: /usr/local/bin/kustomize
+    mode: '0755'
+    remote_src: yes
 
 # "Install" the operator SDK
-- name: Retrieve binary
+- name: Retrieve operator-sdk binary
   get_url:
     url: https://github.com/operator-framework/operator-sdk/releases/download/v{{operator_sdk_version}}/operator-sdk-v{{operator_sdk_version}}-x86_64-linux-gnu
     dest: /tmp/
 
-- name: Move binary to correct location
+- name: Move operator-sdk binary to correct location
   copy:
     src: /tmp/operator-sdk-v{{operator_sdk_version}}-x86_64-linux-gnu
     dest: /usr/local/bin/operator-sdk

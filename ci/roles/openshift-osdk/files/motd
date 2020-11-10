@@ -7,39 +7,44 @@ Here are some tips:
 
 * Dev environment is set for the development of ansible based operator for OpenShift, for more info look at https://docs.openshift.com/container-platform/4.3/operators/operator_sdk/osdk-ansible.html
 
-* To test the operator in the local kubernetes cluster
-# This command runs automated E2E (end to end) tests in the local kubernetes cluster
-
-$ operator-sdk test local
+* To test the operator in the containerized kubernetes cluster
+  # This command runs automated E2E (end to end) tests in the containerized kubernetes cluster
+  $ molecule test -s test-local
 
 * To deploy and run the mbox operator in the local kubernetes cluster:
-  # Build the image and upload it to quay
+  # First you need to start the minikube cluster and enable the ingress addon
+  $ minikube start
+  $ minikube addons enable ingress
+
+  # Build the image and upload it to quay (optional) (you need to be in ~/devel/mbox-operator)
   # This needs to be done every time you made a change to the operator code
-  # You may also need to update the image name in mbox-operator/deploy/operator.yaml
-  $ operator-sdk build quay.io/username/mbbox-operator:tag
+  # You may also need to update the IMG variable in mbox-operator/Makefile
+  $ docker build -t quay.io/username/mbbox-operator:tag .
   $ docker push quay.io/username/mbbox-operator:tag
 
   # Create the mbbox-operator requirements to the local kubernetes cluster
   # This needs to be done only once unless there was a change in any of those resources
-  $ oc apply -f mbox-operator/deploy/crds/apps.fedoraproject.org_mboxes_crd.yaml
-  $ oc apply -f mbox-operator/deploy/service_account.yaml
-  $ oc apply -f mbox-operator/deploy/role.yaml
-  $ oc apply -f mbox-operator/deploy/role_binding.yaml
+  $ make install
   
   # Deploy the operator
-  $ oc create -f mbox-operator/deploy/operator.yaml
+  $ make deploy
 
-  # Verify the operator is up and running
-  # There should be a pod with two containers (ansible and operator)
-  $ oc get deployment -w
+  # Deploy rabbitmq and postgreSQL (you need to be in the ~/devel directory)
+  $ kubectl apply -f components/rabbitmq -n default
+  $ kubectl apply -f components/psql -n default
 
-  # Create a mbox custom resource
-  $ oc create -f mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbox_cr.yaml
+  # Deploy the operator CRDs (you need to be in ~/devel/mbox-operator)
+  $ kustomize build config/samples | kubectl apply -f -
+
+  Congratulations! MBBox is now running inside 'default' namespace.
+
+* To destroy the minikube cluster
+  $ minikube delete
 
 * To debug kubernetes deployment here are a few tips
-  * oc get all - help you see what is currently in kubernetes cluster
-  * oc describe pod/<name> - will give you some overview
-  * oc logs pod/<name> <container> - will show you logs of the pod
+  $ kubectl get all - help you see what is currently in kubernetes cluster
+  $ kubectl describe pod/<name> - will give you some overview
+  $ kubectl logs pod/<name> <container> - will show you logs of the pod
 
 Happy hacking!
 

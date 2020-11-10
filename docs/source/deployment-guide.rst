@@ -16,11 +16,7 @@ Some commands require the usage of the "kustomize" CLI tool which an be found `h
 Makefile
 ========
 
-We have a `Makefile <https://github.com/fedora-infra/mbbox/blob/master/mbox-operator/Makefile>`_ for you ready to be used. You just need to change a few things:
-
-* `NS` variable must be set to namespace you are using (default value: default)
-
-* In case `kubectl` is not available, you can use the same commands with `oc`
+We have a `Makefile <https://github.com/fedora-infra/mbbox/blob/master/mbox-operator/Makefile>`_ for you ready to be used.
 
 Prepare MBBox deployment
 ========================
