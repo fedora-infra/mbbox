@@ -12,7 +12,7 @@ The backend of the module-build-service
 Dependencies
 ============
 
-`Mbox Module Build Service Backend Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbmbsbackends_crd.yaml>`_
+`Mbox Module Build Service Backend Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbmbsbackend.yaml>`_
 
 Parameters
 ==========
@@ -217,7 +217,7 @@ MBS Backend will use the following vars if this property is missing:
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsbackend_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbmbsbackend.yaml>`_
 
 Create a file mbmbsbackend-cr.yaml containing the following content (modify as needed):
 

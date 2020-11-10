@@ -1,0 +1,39 @@
+---
+- name: Converge
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  collections:
+    - community.kubernetes
+    - operator_sdk.util
+
+  tasks:
+    - name: Create Namespace
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: '{{ namespace }}'
+        wait: true
+
+    - name: Deploy postgres
+      k8s:
+        src: "{{ components_dir }}/psql/{{ item }}"
+        namespace: "{{ namespace }}"
+        state: present
+        wait: true
+      with_items:
+        - 0-secret.yaml
+        - 1-pvc.yaml
+        - 2-deployment.yaml
+        - 3-service.yaml
+
+    - name: Create RabbitMQ ConfigMap
+      k8s:
+        src: "{{ components_dir }}/rabbitmq/1-configmap.yaml"
+        namespace: "{{ namespace }}"
+        state: present
+        wait: true
+
+    - import_tasks: kustomize.yml
+      vars:
+        state: present

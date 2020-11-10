@@ -12,7 +12,7 @@ The frontend of the module-build-service
 Dependencies
 ============
 
-`Mbox Module Build Service Frontend Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbmbsfrontends_crd.yaml>`_
+`Mbox Module Build Service Frontend Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbmbsfrontend.yaml>`_
 
 Parameters
 ==========
@@ -259,7 +259,7 @@ MBS Frontend will use the following vars if this property is missing:
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbmbsfrontend_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbmbsfrontend.yaml>`_
 
 Create a file mbmbsfrontend-cr.yaml containing the following content (modify as needed):
 

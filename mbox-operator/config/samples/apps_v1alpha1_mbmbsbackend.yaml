@@ -1,0 +1,24 @@
+apiVersion: apps.fedoraproject.org/v1alpha1
+kind: MBMbsBackend
+metadata:
+  name: example-mb-mbs-backend
+spec:
+  replicas: 1
+  image: quay.io/fedora/mbs-backend:latest
+  hub_username: mbs
+  cacert_secret: koji-hub-ca-cert
+  client_cert_secret: mbs-client-cert
+  postgres_secret: postgres
+  configmap: mbs-configmap
+  fedora_versions: ['32']
+  hub_host: 'koji-hub:8443'
+  messaging_system: 'fedmsg'
+  topic_prefix: 'org.fedoraproject.dev'
+  scm_url: 'git+https://src.fedoraproject.org/modules/'
+  rpms_default_repository: 'git+https://src.fedoraproject.org/rpms/'
+  rpms_default_cache: 'https://src.fedoraproject.org/repo/pkgs/'
+  modules_default_repository: 'git+https://src.fedoraproject.org/modules/'
+  pdc_url: 'https://pdc.stg.fedoraproject.org/rest_api/v1'
+  oidc_required_scope: 'https://mbs.fedoraproject.org/oidc/submit-build'
+  shared_pvc: 'koji-hub-mnt-pvc'
+  # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

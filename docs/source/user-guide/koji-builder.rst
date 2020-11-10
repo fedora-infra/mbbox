@@ -12,7 +12,7 @@ MBox utilizes koji-builder to create a new repositories when needed.
 Dependencies
 ============
 
-`Koji-Builder Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_mbkojibuilders_crd.yaml>`_
+`Koji-Builder Custom Resource Definition (CRD) <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/crd/bases/apps.fedoraproject.org_mbkojibuilders.yaml>`_
 
 Koji builder depends on `koji-hub <koji-hub.html#koji-hub>`_. This component is deployed as part of the operator deployment.
 
@@ -177,7 +177,7 @@ Koji-builder will use the following vars if this property is missing:
 Usage
 =====
 
-Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/deploy/crds/apps.fedoraproject.org_v1alpha1_mbkojibuilder_cr.yaml>`_
+Upstream file can be found `here <https://raw.githubusercontent.com/fedora-infra/mbbox/master/mbox-operator/config/samples/apps_v1alpha1_mbkojibuilder.yaml>`_
 
 Create a file containing the following content (modify as needed):
 

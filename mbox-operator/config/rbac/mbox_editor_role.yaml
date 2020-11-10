@@ -1,0 +1,24 @@
+# permissions for end users to edit mboxes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mbox-editor-role
+rules:
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mboxes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mboxes/status
+  verbs:
+  - get

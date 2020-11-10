@@ -3,32 +3,35 @@ dependency:
   name: galaxy
 driver:
   name: delegated
-  options:
-    managed: true
-    ansible_connection_options: {}
 lint: |
-  yamllint roles/
+  set -e
+  yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" .
 platforms:
-  - name: kind-default
+  - name: cluster
     groups:
       - k8s
 provisioner:
   name: ansible
-  log: true
-  lint:
-    name: ansible-lint
-    enabled: false
+  lint: |
+    set -e
+    ansible-lint
   inventory:
     group_vars:
       all:
-        namespace: ${TEST_NAMESPACE:-osdk-test}
+        namespace: ${TEST_OPERATOR_NAMESPACE:-osdk-test}
+    host_vars:
+      localhost:
+        ansible_python_interpreter: '{{ ansible_playbook_python }}'
+        config_dir: ${MOLECULE_PROJECT_DIRECTORY}/config
+        samples_dir: ${MOLECULE_PROJECT_DIRECTORY}/config/samples
+        components_dir: ${MOLECULE_PROJECT_DIRECTORY}/../components
+        operator_image: ${OPERATOR_IMAGE:-""}
+        operator_pull_policy: ${OPERATOR_PULL_POLICY:-"Always"}
+        kustomize: ${KUSTOMIZE_PATH:-kustomize}
   env:
-    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
-scenario:
-  name: default
-  test_sequence:
-    - lint
+    K8S_AUTH_KUBECONFIG: ${KUBECONFIG:-"~/.kube/config"}
 verifier:
-  name: testinfra
+  name: ansible
   lint: |
-    flake8
+    set -e
+    ansible-lint

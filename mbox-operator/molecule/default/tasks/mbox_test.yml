@@ -1,0 +1,42 @@
+---
+- name: Create the apps.fedoraproject.org/v1alpha1.Mbox
+  k8s:
+    state: present
+    namespace: '{{ namespace }}'
+    definition: "{{ lookup('template', '/'.join([samples_dir, cr_file])) | from_yaml }}"
+    wait: yes
+    wait_timeout: 300
+    wait_condition:
+      type: Running
+      reason: Successful
+      status: "True"
+  vars:
+    cr_file: 'apps_v1alpha1_mbox.yaml'
+
+- block:
+    - name: mbox.secret.root_ca
+      k8s_info:
+        api_version: v1
+        kind: Secret
+        namespace: "{{ namespace }}"
+        name: mbox-koji-root-ca
+      register: k8s_secrets
+    - assert:
+        that:
+          - k8s_secrets.resources|length == 1
+          - k8s_secrets.resources[0].metadata.labels['app'] == 'mbox'
+          - "'ca_req.pem' in k8s_secrets.resources[0].data"
+          - "'ca_cert.pem' in k8s_secrets.resources[0].data"
+          - "'ca_key.pem' in k8s_secrets.resources[0].data"
+
+- block:
+    - name: mbox.secret.root_ca
+      k8s_info:
+        api_version: v1
+        kind: ConfigMap
+        namespace: "{{ namespace }}"
+        name: mbs-configmap
+      register: k8s_cms
+    - assert:
+        that:
+          - k8s_cms.resources|length == 1

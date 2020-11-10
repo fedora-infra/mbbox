@@ -11,8 +11,30 @@
   roles:
     - mbbox-dev
     - openshift-osdk
+
 - hosts: all
   tasks:
-    - name: Run molecule test-cluster
-      command: chdir={{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator molecule --debug test -s test-cluster
+    - name: Download kustomize
+      get_url:
+        url: https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh
+        dest: /usr/bin/install_kustomize.sh
+        mode: '0755'
       become: true
+    - name:  
+      command: ./install_kustomize.sh
+      args:
+        chdir: /usr/bin
+      become: true
+    - name: Run molecule test-cluster
+      command: molecule test
+      args:
+        chdir: "{{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator"
+      become: true
+      environment:
+        OPERATOR_IMAGE: "quay.io/fedora/mbox-operator:latest"
+        MOLECULE_PROJECT_DIRECTORY: "{{ansible_user_dir}}/{{zuul.project.src_dir}}/mbox-operator"
+        OPERATOR_PULL_POLICY: Always
+        K8S_AUTH_KUBECONFIG: /tmp/molecule/kind-test-local/kubeconfig
+        KUBECONFIG: /tmp/molecule/kind-test-local/kubeconfig
+        ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
+        KIND_PORT: '10443'

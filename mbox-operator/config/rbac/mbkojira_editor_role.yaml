@@ -1,0 +1,24 @@
+# permissions for end users to edit mbkojiras.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mbkojira-editor-role
+rules:
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbkojiras
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.fedoraproject.org
+  resources:
+  - mbkojiras/status
+  verbs:
+  - get
