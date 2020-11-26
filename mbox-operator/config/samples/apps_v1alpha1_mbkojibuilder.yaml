@@ -9,7 +9,8 @@ spec:
   cacert_secret: koji-hub-ca-cert
   client_cert_secret: koji-builder-client-cert
   koji_hub_user: 'koji-builder.mbox.dev'
-  koji_hub_url: 'https://koji-hub:8443'
+  koji_hub_host: 'koji-hub'
+  koji_hub_port: 8443
   max_jobs: 5
   vendor: MBox
   host_archs:
