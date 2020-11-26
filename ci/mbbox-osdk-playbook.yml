@@ -4,5 +4,4 @@
   become_method: sudo
   vars:
   roles:
-    - mbbox-dev
     - openshift-osdk

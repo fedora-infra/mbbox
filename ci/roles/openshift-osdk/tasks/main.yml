@@ -1,4 +1,18 @@
 ---
+- name: Install helpful development packages
+  dnf:
+    name: [
+           fpaste,
+           git,
+           htop,
+           make,
+           python3-black,
+           python3-sphinx,
+           tmux,
+           vim-enhanced,
+          ]
+    state: present
+
 # Add various helpful configuration files
 - name: Install the message of the day
   copy: src=motd dest=/etc/motd
