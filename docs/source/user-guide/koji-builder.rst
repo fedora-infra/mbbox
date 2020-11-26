@@ -34,7 +34,9 @@ Parameters
 +----------------------+------------------------------------+----------+
 | koji_hub_user        | 'koji-builder.mbox.dev'            | string   |
 +----------------------+------------------------------------+----------+
-| koji_hub_url         | 'https://koji-hub:8443'            | string   |
+| koji_hub_host        | 'koji-hub'                         | string   |
++----------------------+------------------------------------+----------+
+| koji_hub_port        | 8443                               | string   |
 +----------------------+------------------------------------+----------+
 | max_jobs             | 5                                  | int      |
 +----------------------+------------------------------------+----------+
@@ -113,10 +115,15 @@ koji_hub_user
 
 User to use when authenticating with koji-hub.
 
-koji_hub_url
-------------
+koji_hub_host
+-------------
 
-URL of the koji-hub koji-builder will connect to.
+Hostname of the koji-hub server instance that koji-builder will connect to.
+
+koji_hub_port
+-------------
+
+Port of the koji-hub server instance that koji-builder will connect to.
 
 max_jobs
 --------
@@ -196,7 +203,8 @@ Create a file containing the following content (modify as needed):
     cacert_secret: koji-hub-ca-cert
     client_cert_secret: koji-builder-client-cert
     koji_hub_user: 'koji-builder.mbox.dev'
-    koji_hub_url: 'https://koji-hub:8443'
+    koji_hub_host: 'koji-hub'
+    koji_hub_port: 8443
     max_jobs: 5
     vendor: MBox
     host_archs:

@@ -1,4 +1,6 @@
 ---
+- set_fact:
+    koji_builder_koji_hub_url: "https://{{ koji_builder_koji_hub_host }}.{{ meta.namespace }}.svc:{{ koji_builder_koji_hub_port }}"
 - block:
     - name: retrieve mbox resource
       k8s_info:

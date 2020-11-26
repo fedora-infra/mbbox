@@ -179,22 +179,24 @@
 # it ignores any kind of conflict errors in case the user already exists.
 - block:
     - name: psql admin user setup
-      postgresql_query:
+      set_fact:
+        psql_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}.{{ psql_secret.metadata.namespace }}.svc"
+    - postgresql_query:
         db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
-        login_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        login_host: "{{ psql_host }}"
         login_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
         login_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
         query: INSERT INTO users(name, status, usertype) VALUES('{{ koji_hub_admin_username }}', 0, 0) ON CONFLICT DO NOTHING
     - postgresql_query:
         db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
-        login_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        login_host: "{{ psql_host }}"
         login_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
         login_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
         query: SELECT * FROM users WHERE name='{{ koji_hub_admin_username }}'
       register: psql_user_query
     - postgresql_query:
         db: "{{ psql_secret.data.POSTGRES_DB | b64decode }}"
-        login_host: "{{ psql_secret.data.POSTGRES_HOST | b64decode }}"
+        login_host: "{{ psql_host }}"
         login_user: "{{ psql_secret.data.POSTGRES_USER | b64decode }}"
         login_password: "{{ psql_secret.data.POSTGRES_PASSWORD | b64decode }}"
         query: INSERT INTO user_perms (user_id, perm_id, creator_id) VALUES ({{ psql_user_query.query_result[0].id }}, 1, 1) ON CONFLICT DO NOTHING

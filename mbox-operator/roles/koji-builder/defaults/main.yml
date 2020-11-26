@@ -8,7 +8,8 @@ koji_builder_cacert_secret: "{{ cacert_secret|default('koji-builder-ca-cert') }}
 koji_builder_client_cert_secret: "{{ client_cert_secret|default('koji-builder-client-cert') }}"
 koji_builder_hub_user: "{{ koji_hub_user|default('koji-builder.mbox.dev') }}"
 
-koji_builder_koji_hub_url: "{{ koji_hub_url|default('https://koji-hub:8443') }}"
+koji_builder_koji_hub_host: "{{ koji_hub_host|default('koji-hub') }}"
+koji_builder_koji_hub_port: "{{ koji_hub_port|default(8443) }}"
 koji_builder_maxjobs: "{{ max_jobs|default(5) }}"
 koji_builder_vendor: "{{ vendor|default('MBox') }}"
 
