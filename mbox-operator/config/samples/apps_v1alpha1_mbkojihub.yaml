@@ -26,5 +26,6 @@ spec:
   mnt_pvc_size: 10Gi
   web_client_cert_secret: koji-hub-web-client-cert
   web_client_username: kojiweb
+  admin_client_cert: koji-hub-admin-cert
   admin_username: kojiadmin
   # mbox: example-mbox #uncomment to retrieve pvc and cert config from a mbox cr

@@ -25,6 +25,7 @@ koji_hub_host: "{{ host | default('kojihub.mbox.dev') }}"
 
 koji_hub_ingress_backend: "{{ ingress_backend | default('nginx') }}"
 
+koji_hub_admin_client_cert: "{{ admin_client_cert | default('koji-hub-admin-cert') }}"
 koji_hub_admin_username: "{{ admin_username | default('kojiadmin') }}"
 
 koji_mbox: "{{ mbox | default('') }}"
