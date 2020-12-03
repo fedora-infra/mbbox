@@ -1,0 +1,118 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    namespace: mbbox
+    key_size: 4096
+    rabbitmq_host: "rabbitmq"
+    rabbitmq_username: mbbox
+  tasks:
+    - name: tmp_dir.create
+      tempfile:
+        state: directory
+        suffix: mbbox
+      register: tmp_dir
+    - name: tmp_dir.var
+      set_fact:
+        cert_dir: "{{ tmp_dir.path }}"
+
+    - name: ca.key
+      openssl_privatekey:
+        path: "{{ cert_dir }}/ca_key.pem"
+        size: "{{ key_size|int }}"
+    - name: ca.csr
+      openssl_csr:
+        path: "{{ cert_dir }}/ca_req.pem"
+        privatekey_path: "{{ cert_dir }}/ca_key.pem"
+        common_name: "{{ rabbitmq_host }}"
+        create_subject_key_identifier: true
+        key_usage:
+          - cRLSign
+          - dataEncipherment
+          - digitalSignature
+          - keyCertSign
+          - keyEncipherment
+          - nonRepudiation
+        basic_constraints:
+          - 'CA:TRUE'
+    - name: ca.crt
+      openssl_certificate:
+        path: "{{ cert_dir }}/ca_cert.pem"
+        privatekey_path: "{{ cert_dir }}/ca_key.pem"
+        csr_path: "{{ cert_dir }}/ca_req.pem"
+        provider: selfsigned
+
+    - name: server.key
+      openssl_privatekey:
+        path: "{{ cert_dir }}/server_key.pem"
+        size: "{{ key_size|int }}"
+    - name: server.csr
+      openssl_csr:
+        path: "{{ cert_dir }}/server_req.pem"
+        privatekey_path: "{{ cert_dir }}/server_key.pem"
+        common_name: "{{ rabbitmq_host }}"
+        subject_alt_name:
+          - "DNS:{{ rabbitmq_host }}"
+          - "DNS:{{ rabbitmq_host }}.{{ namespace }}.svc"
+          - "DNS:{{ rabbitmq_host }}.{{ namespace }}.svc.cluster"
+    - name: server.crt
+      openssl_certificate:
+        path: "{{ cert_dir }}/server_cert.pem"
+        csr_path: "{{ cert_dir }}/server_req.pem"
+        ownca_path: "{{ cert_dir }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir }}/ca_key.pem"
+        provider: ownca
+
+    - name: client.key
+      openssl_privatekey:
+        path: "{{ cert_dir }}/client_key.pem"
+        size: "{{ key_size|int }}"
+    - name: client.csr
+      openssl_csr:
+        path: "{{ cert_dir }}/client_req.pem"
+        privatekey_path: "{{ cert_dir }}/client_key.pem"
+        common_name: "{{ rabbitmq_username }}"
+    - name: client.crt
+      openssl_certificate:
+        path: "{{ cert_dir }}/client_cert.pem"
+        csr_path: "{{ cert_dir }}/client_req.pem"
+        ownca_path: "{{ cert_dir }}/ca_cert.pem"
+        ownca_privatekey_path: "{{ cert_dir }}/ca_key.pem"
+        provider: ownca
+
+    - name: k8s.rabbitmq.configmap(name=rabbitmq-certs)
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: rabbitmq-certs
+            namespace: "{{ namespace }}"
+          data:
+            ca: "{{ lookup('file', cert_dir + '/ca_cert.pem') }}"
+            cert: "{{ lookup('file', cert_dir + '/server_cert.pem') }}"
+            key: "{{ lookup('file', cert_dir + '/server_key.pem') }}"
+
+    - name: k8s.rabbitmq.configmap(name=koji-hub-msg)
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: koji-hub-msg
+            namespace: "{{ namespace }}"
+          data:
+            ca: "{{ lookup('file', cert_dir + '/ca_cert.pem') }}"
+            cert: "{{ lookup('file', cert_dir + '/client_cert.pem') }}"
+            key: "{{ lookup('file', cert_dir + '/client_key.pem') }}"
+
+    - name: k8s.rabbitmq
+      k8s:
+        definition: "{{ lookup('file', './' + item) }}"
+        namespace: "{{ namespace }}"
+        wait: true
+      with_items:
+        - 0-secret.yaml
+        - 2-pvc.yaml
+        - 4-deployment.yaml
+        - 3-service.yaml

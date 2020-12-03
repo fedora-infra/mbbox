@@ -29,7 +29,7 @@
 
     - name: Create RabbitMQ ConfigMap
       k8s:
-        src: "{{ components_dir }}/rabbitmq/1-configmap.yaml"
+        src: "{{ components_dir }}/rabbitmq/1-app.secret.yaml"
         namespace: "{{ namespace }}"
         state: present
         wait: true

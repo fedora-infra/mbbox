@@ -8,7 +8,7 @@ koji_hub_postgres_secret: "{{ postgres_secret | default('postgres') }}"
 koji_hub_configmap: "{{ configmap | default('koji-hub-configmap') }}"
 koji_hub_ca_cert_secret: "{{ ca_cert_secret | default('koji-hub-ca-cert') }}"
 koji_hub_service_cert_secret: "{{ service_cert_secret | default('koji-hub-service-cert') }}"
-koji_hub_messaging_cert_cm: "{{ messaging_cert_cm | default('koji-hub-msg') }}"
+koji_hub_messaging_cert_secret: "{{ messaging_cert_secret | default('koji-hub-msg') }}"
 
 koji_hub_httpd_pvc_name: "{{ httpd_pvc_name | default('koji-hub-httpd-pvc') }}"
 koji_hub_httpd_pvc_size: "{{ httpd_pvc_size | default('1Gi') }}"

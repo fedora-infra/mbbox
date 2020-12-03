@@ -46,16 +46,16 @@
         psql_secret: "{{ k8s_psql_secrets.resources[0] }}"
 
 - block:
-    - name: Check if messaging configmap exists
+    - name: Check if messaging secret exists
       k8s_info:
         api_version: v1
-        kind: ConfigMap
+        kind: Secret
         namespace: "{{ meta.namespace }}"
-        name: "{{ koji_hub_messaging_cert_cm }}"
-      register: k8s_msg_cm
+        name: "{{ koji_hub_messaging_cert_secret }}"
+      register: k8s_msg_secret
     - fail:
-        msg: "Configmap {{ koji_hub_messaging_cert_cm }} not found in namespace {{ meta.namespace }}"
-      when: k8s_msg_cm.resources|length == 0
+        msg: "Secret {{ koji_hub_messaging_cert_secret }} not found in namespace {{ meta.namespace }}"
+      when: k8s_msg_secret.resources|length == 0
 
 - block:
     - name: Ensure koji-hub configmap is updated
