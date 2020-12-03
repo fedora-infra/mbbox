@@ -71,5 +71,5 @@ spec:
           persistentVolumeClaim:
             claimName: "{{ koji_hub_mnt_pvc_name }}"
         - name: koji-hub-msg
-          configMap:
-            name: {{ koji_hub_messaging_cert_cm }}
+          secretName:
+            name: {{ koji_hub_messaging_cert_secret }}

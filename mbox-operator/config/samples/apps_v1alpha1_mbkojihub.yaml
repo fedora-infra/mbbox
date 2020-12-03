@@ -17,7 +17,7 @@ spec:
   https_enabled: true
   topic_prefix: mbox_dev
   fedora_messaging_url: amqps://koji:something@rabbitmq
-  messaging_cert_cm: koji-hub-msg
+  messaging_cert_secret: koji-hub-msg
   ingress_backend: nginx # default
   # ingress_backend: openshift
   httpd_pvc_name: koji-hub-httpd-pvc
