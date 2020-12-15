@@ -6,7 +6,7 @@ metadata:
     app: koji-hub
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ pvc_mode }}
   resources:
     requests:
       storage: {{ pvc_size }}

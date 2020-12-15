@@ -94,6 +94,7 @@
       vars:
         pvc_name: "{{ koji_hub_httpd_pvc_name }}"
         pvc_size: "{{ koji_hub_httpd_pvc_size }}"
+        pvc_mode: ReadWriteOnce
         pvc_namespace: "{{ meta.namespace }}"
       when: k8s_httpd_pvc.resources|length == 0
     - k8s_info:
@@ -106,6 +107,7 @@
       vars:
         pvc_name: "{{ koji_hub_mnt_pvc_name }}"
         pvc_size: "{{ koji_hub_mnt_pvc_size }}"
+        pvc_mode: ReadWriteMany
         pvc_namespace: "{{ meta.namespace }}"
       when:
         - koji_mbox|length == 0
