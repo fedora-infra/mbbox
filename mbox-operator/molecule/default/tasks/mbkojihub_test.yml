@@ -85,7 +85,7 @@
       that:
         - kojihub_pvcs.resources|length == 1
         - kojihub_pvcs.resources[0].metadata.labels['app'] == 'koji-hub'
-        - "'ReadWriteOnce' in kojihub_pvcs.resources[0].spec.accessModes"
+        - "'ReadWriteMany' in kojihub_pvcs.resources[0].spec.accessModes"
         - "kojihub_pvcs.resources[0].spec.resources.requests.storage == '10Gi'"
   - k8s_info:
       api_version: v1
