@@ -17,6 +17,14 @@
         koji_builder_cacert_secret: "{{ k8s_mboxes.resources[0].spec.root_ca_secret_name }}"
   when: koji_builder_mbox|length > 0
 
+- name: Check for koji-builder client secret existence 
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ koji_builder_client_cert_secret }}"
+    namespace: "{{ meta.namespace }}"
+  register: clientcert_query
+
 - name: Retrieve ca secret
   block:
     - k8s_info:
@@ -36,6 +44,7 @@
     - copy:
         content: "{{ ca.data.key | b64decode }}"
         dest: "{{ cert_dir.path }}/ca_key.pem"
+      when: clientcert_query.resources|length == 0
     - copy:
         content: "{{ ca.data.cert | b64decode }}"
         dest: "{{ koji_dir.path }}/ca.pem"
@@ -55,15 +64,10 @@
         ownca_path: "{{ cert_dir.path }}/ca_cert.pem"
         ownca_privatekey_path: "{{ cert_dir.path }}/ca_key.pem"
         provider: ownca
+  when: clientcert_query.resources|length == 0
 
 - name: Kubernetes client certificate secret creation
   block:
-    - k8s_info:
-        api_version: v1
-        kind: Secret
-        name: "{{ koji_builder_client_cert_secret }}"
-        namespace: "{{ meta.namespace }}"
-      register: clientcert_query
     - k8s:
         definition:
           apiVersion: v1
@@ -78,7 +82,7 @@
             tls.key: "{{ lookup('file', cert_dir.path + '/client_key.pem') | b64encode }}"
             tls.pem: "{{ (lookup('file', cert_dir.path + '/client_key.pem') + '\n' + lookup('file', cert_dir.path + '/client_cert.pem')) | b64encode }}"
           type: kubernetes.io/tls
-      when: clientcert_query.resources|length == 0
+  when: clientcert_query.resources|length == 0
 
 - name: cleanup
   file:
