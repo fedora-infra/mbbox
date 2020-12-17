@@ -1,4 +1,4 @@
-FROM fedora:31
+FROM fedora:33
 
 RUN yum install -y module-build-service python3-psycopg2 httpd python3-mod_wsgi mod_ssl
 
