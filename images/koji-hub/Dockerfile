@@ -1,6 +1,7 @@
-FROM fedora:31
+FROM centos:8
 
-RUN dnf install --setopt tsflags= -y \
+RUN yum install -y epel-release
+RUN yum install -y \
 koji koji-hub koji-web koji-hub-plugins \
 curl httpd mod_ssl postgresql fedora-messaging python3-mod_wsgi
 

@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM fedora:33
 
 RUN yum install -y module-build-service python3-psycopg2 python3-fedmsg
 
