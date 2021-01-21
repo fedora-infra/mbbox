@@ -6,8 +6,6 @@ labels: ''
 assignees: ''
 
 ---
+# Description
 
 ## Acceptance Criteria
-
-
-## Definition of Done
