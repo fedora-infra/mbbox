@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kerberos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kerberos
+  template:
+    metadata:
+      labels:
+        app: kerberos
+    spec:
+      containers:
+        - name: kerberos
+          image: quay.io/zlopez/kerberos:latest
+          env:
+            - name: KRB5_CONFIG
+              value: "/etc/kerberos/krb5.conf"
+          command: ["bash"]
+          args: ["/etc/kerberos/start.sh"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 88
+            - containerPort: 749
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/kerberos
+            readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: kerberos-configmap
+      - name: kdc-config-volume
+        configMap:
+          name: kerberos-kdc-configmap

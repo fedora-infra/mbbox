@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kerberos-configmap
+data:
+  krb5.conf: |-
+    [logging]                                  
+    default = FILE:/var/log/krb5libs.log      
+    kdc = FILE:/var/log/krb5kdc.log           
+    admin_server = FILE:/var/log/kadmind.log  
+
+    [libdefaults]                              
+    ticket_lifetime = 24000                   
+    default_realm = DEFAULT.SVC.CLUSTER.LOCAL            
+
+    [realms]                                   
+    DEFAULT.SVC.CLUSTER.LOCAL = {                         
+    kdc = kerberos.default.svc.cluster.local:88           
+    admin_server = kerberos.default.svc.cluster.local:749 
+    default_domain = default.svc.cluster.local           
+    }                                         
+
+    [domain_realm]                             
+    .default.svc.cluster.local = DEFAULT.SVC.CLUSTER.LOCAL            
+    default.svc.cluster.local = DEFAULT.SVC.CLUSTER.LOCAL            
+
+    [kdc]                                      
+    profile = /etc/kerberos/kdc.conf  
+
+    [pam]
+    debug = false
+    ticket_lifetime = 36000
+    renew_lifetime = 36000
+    forwardable = true
+    krb4_convert = false
+
+  kdc.conf: |-
+    [kdcdefaults]                                                                   
+    kdc_ports = 88                                                                 
+    acl_file = /etc/kerberos/kadm5.acl                                     
+    dict_file = /usr/dict/words                                                    
+    admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab                              
+
+    [realms]                                                                        
+    DEFAULT.SVC.CLUSTER.LOCAL = {                                                              
+      database_name = /var/kerberos/krb5kdc/principal                               
+      admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab                             
+      kadmind_port = 749                                                            
+      acl_file = /etc/kerberos/kadm5.acl                                    
+      dict_file = /usr/dict/words                                                   
+    }
+
+  kadm5.acl: |-
+    */admin@DEFAULT.SVC.CLUSTER.LOCAL *
+
+  start.sh: |-
+    #!/bin/sh
+
+    # Create kerberos database
+    expect -c "
+    spawn kdb5_util create -s
+    expect \"Enter KDC database master key:\"
+    send \"admin\n\"
+    expect \"Re-enter KDC database master key to verify:\"
+    send \"admin\n\"
+    expect eof
+    exit
+    "
+
+    # Start services
+    krb5kdc
+    kadmin
+
+    # Create principals and add them to keytab
+    expect -c "
+    spawn kadmin.local
+    # Create principal host/krb-server.default.svc.cluster.local
+    expect \"kadmin.local:\"
+    send \"addprinc host/krb-server.default.svc.cluster.local\n\"
+    expect \"Enter password for principal 'host/krb-server.default.svc.cluster.local@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    send \"admin\n\"
+    expect \"Re-enter password for principal 'host/krb-server.default.svc.cluster.local@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    send \"admin\n\"
+    expect \"Principal 'host/krb-server.test.mbobx.com@DEFAULT.SVC.CLUSTER.LOCAL' created.\"
+
+    # Create principal root
+    expect \"kadmin.local:\"
+    send \"addprinc root\n\"
+    expect \"Enter password for principal 'root@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    send \"admin\n\"
+    expect \"Re-enter password for principal 'root@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    send \"admin\n\"
+    expect \"Principal 'root@DEFAULT.SVC.CLUSTER.LOCAL' created.\"
+
+    # Add the host to keytab
+    expect \"kadmin.local:\"
+    send \"ktadd -k /etc/krb5.keytab host/krb-server.default.svc.cluster.local\n\"
+    expect \"Entry for principal host/krb-server.default.svc.cluster.local with kvno 2, encryption type DES cbc mode with CRC-32 added to keytab WRFILE:/etc/krb5.keytab.\"
+    expect \"Entry for principal host/krb-server.default.svc.cluster.local with kvno 2, encryption type Triple DES cbc mode raw added to keytab WRFILE:/etc/krb5.keytab.\"
+    expect \"kadmin.local:\"
+    send \"exit\n\"
+    expect eof
+    exit
+    "
+
+    # Keep the eye on the log
+    tail -f /var/log/krb5kdc.log
