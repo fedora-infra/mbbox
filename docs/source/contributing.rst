@@ -59,6 +59,19 @@ Issue: Timeout in reconciliation task
 
 This was caused by low space, because failing tests aren't removing docker volumes when they fails. To remove the volumes run following command `docker volume prune`.
 
+Issue: Can't reach service from the pod in minikube
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This issue is caused by network problem inside docker running minikube cluster. You can encounter this issue in vagrant when trying to access the service from pod which
+is linked to the service.
+
+To fix this just run the following:
+
+.. code-block:: bash
+
+   minikube ssh
+   sudo ip link set docker0 promisc on
+
 Environment
 ===========
 

@@ -16,6 +16,10 @@ Here are some tips:
   $ minikube start
   $ minikube addons enable ingress
 
+  # To prevent issues in docker network setup of minikube
+  $ minikube ssh
+  $ sudo ip link set docker0 promisc on
+
   # Build the image and upload it to quay (optional) (you need to be in ~/devel/mbox-operator)
   # This needs to be done every time you made a change to the operator code
   # You may also need to update the IMG variable in mbox-operator/Makefile
