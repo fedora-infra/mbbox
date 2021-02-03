@@ -11,18 +11,18 @@ data:
 
     [libdefaults]                              
     ticket_lifetime = 24000                   
-    default_realm = DEFAULT.SVC.CLUSTER.LOCAL            
+    default_realm = KERBEROS            
 
     [realms]                                   
-    DEFAULT.SVC.CLUSTER.LOCAL = {                         
-    kdc = kerberos.default.svc.cluster.local:88           
-    admin_server = kerberos.default.svc.cluster.local:749 
-    default_domain = default.svc.cluster.local           
+    KERBEROS = {                         
+    kdc = kerberos:88           
+    admin_server = kerberos:749 
+    default_domain = kerberos           
     }                                         
 
     [domain_realm]                             
-    .default.svc.cluster.local = DEFAULT.SVC.CLUSTER.LOCAL            
-    default.svc.cluster.local = DEFAULT.SVC.CLUSTER.LOCAL            
+    .kerberos = KERBEROS            
+    kerberos = KERBEROS            
 
     [kdc]                                      
     profile = /etc/kerberos/kdc.conf  
@@ -42,7 +42,7 @@ data:
     admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab                              
 
     [realms]                                                                        
-    DEFAULT.SVC.CLUSTER.LOCAL = {                                                              
+    KERBEROS = {                                                              
       database_name = /var/kerberos/krb5kdc/principal                               
       admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab                             
       kadmind_port = 749                                                            
@@ -51,7 +51,7 @@ data:
     }
 
   kadm5.acl: |-
-    */admin@DEFAULT.SVC.CLUSTER.LOCAL *
+    */admin@KERBEROS *
 
   start.sh: |-
     #!/bin/sh
@@ -68,35 +68,44 @@ data:
     "
 
     # Start services
-    krb5kdc
-    kadmin
+    /usr/sbin/krb5kdc
+    /usr/sbin/kadmind
 
     # Create principals and add them to keytab
     expect -c "
     spawn kadmin.local
-    # Create principal host/krb-server.default.svc.cluster.local
+    # Create principal host
     expect \"kadmin.local:\"
-    send \"addprinc host/krb-server.default.svc.cluster.local\n\"
-    expect \"Enter password for principal 'host/krb-server.default.svc.cluster.local@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    send \"addprinc host/kerberos\n\"
+    expect \"Enter password for principal 'host/kerberos@KERBEROS':\"
     send \"admin\n\"
-    expect \"Re-enter password for principal 'host/krb-server.default.svc.cluster.local@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    expect \"Re-enter password for principal 'host/kerberos@KERBEROS':\"
     send \"admin\n\"
-    expect \"Principal 'host/krb-server.test.mbobx.com@DEFAULT.SVC.CLUSTER.LOCAL' created.\"
+    expect \"Principal 'host/kerberos@KERBEROS' created.\"
 
     # Create principal root
     expect \"kadmin.local:\"
     send \"addprinc root\n\"
-    expect \"Enter password for principal 'root@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    expect \"Enter password for principal 'root@KERBEROS':\"
     send \"admin\n\"
-    expect \"Re-enter password for principal 'root@DEFAULT.SVC.CLUSTER.LOCAL':\"
+    expect \"Re-enter password for principal 'root@KERBEROS':\"
     send \"admin\n\"
-    expect \"Principal 'root@DEFAULT.SVC.CLUSTER.LOCAL' created.\"
+    expect \"Principal 'root@KERBEROS' created.\"
+
+    # Create principal root/admin
+    expect \"kadmin.local:\"
+    send \"addprinc root/admin\n\"
+    expect \"Enter password for principal 'root/admin@KERBEROS':\"
+    send \"admin\n\"
+    expect \"Re-enter password for principal 'root/admin@KERBEROS':\"
+    send \"admin\n\"
+    expect \"Principal 'root/admin@KERBEROS' created.\"
 
     # Add the host to keytab
     expect \"kadmin.local:\"
-    send \"ktadd -k /etc/krb5.keytab host/krb-server.default.svc.cluster.local\n\"
-    expect \"Entry for principal host/krb-server.default.svc.cluster.local with kvno 2, encryption type DES cbc mode with CRC-32 added to keytab WRFILE:/etc/krb5.keytab.\"
-    expect \"Entry for principal host/krb-server.default.svc.cluster.local with kvno 2, encryption type Triple DES cbc mode raw added to keytab WRFILE:/etc/krb5.keytab.\"
+    send \"ktadd -k /etc/krb5.keytab host/kerberos\n\"
+    expect \"Entry for principal host/kerberos with kvno 2, encryption type DES cbc mode with CRC-32 added to keytab WRFILE:/etc/krb5.keytab.\"
+    expect \"Entry for principal host/kerberos with kvno 2, encryption type Triple DES cbc mode raw added to keytab WRFILE:/etc/krb5.keytab.\"
     expect \"kadmin.local:\"
     send \"exit\n\"
     expect eof
