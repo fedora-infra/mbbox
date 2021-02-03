@@ -27,6 +27,17 @@
         - 2-deployment.yaml
         - 3-service.yaml
 
+    - name: Deploy kerberos
+      k8s:
+        src: "{{ components_dir }}/kerberos/{{ item }}"
+        namespace: "{{ namespace }}"
+        state: present
+        wait: true
+      with_items:
+        - 0-service.yaml
+        - 1-configmap.yaml
+        - 2-deployment.yaml
+        
     - name: Create RabbitMQ ConfigMap
       k8s:
         src: "{{ components_dir }}/rabbitmq/1-app.secret.yaml"

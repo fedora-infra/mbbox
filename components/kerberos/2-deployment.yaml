@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: kerberos
-          image: quay.io/zlopez/kerberos:latest
+          image: quay.io/fedora/kerberos:latest
           env:
             - name: KRB5_CONFIG
               value: "/etc/kerberos/krb5.conf"
