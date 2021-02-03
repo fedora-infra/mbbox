@@ -35,8 +35,7 @@ If you encounter any error when running test you can debug the issue by connecti
 .. code-block:: bash
 
    molecule converge -s test-local #runs local test without destroy sequence
-   docker ps #find container named kind-test-local
-   docker exec -it <container_id> bash #<container_id> of container from previous command
+   docker exec -it kind-test-local bash #get inside the container created in previous step
    kubectl config set-context --current --namespace=osdk-test #sets namespace to operator-sdk
 
 Here are few useful commands for debugging, for another commands look at `kubectl help`:
